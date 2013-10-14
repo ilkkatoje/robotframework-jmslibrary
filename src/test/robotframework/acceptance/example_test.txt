@@ -1,0 +1,35 @@
+*** Settings ***
+
+Library         JMSLibrary
+Suite Setup     Connect And Start  org.apache.activemq.jndi.ActiveMQInitialContextFactory  tcp://localhost:61616?jms.useAsyncSend=false
+Suite Teardown  Close
+Test Setup      Clear Queue  ${QUEUE}
+Test Tear Down  Clear Queue  ${QUEUE}
+
+
+
+*** Variables ***
+
+${QUEUE}    	QUEUE.JMSLIBRARY.TEST
+${TOPIC}    	TOPIC.JMSLIBRARY.TEST
+${BODY_TEXT}    Hello world!
+
+
+
+*** Test Cases ***
+
+Queue Send and Receive TextMessage
+    Create Text Message  ${BODY_TEXT}
+    Send To Queue  ${QUEUE}
+    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    ${body}=  Get Text
+    Should Be Equal  ${BODY_TEXT}  ${body}
+
+Topic Send and Receive TextMessage
+    Subscribe  ${TOPIC}
+    Create Text Message  ${BODY_TEXT}
+    Send To Topic  ${TOPIC}
+    Wait Until Keyword Succeeds  10 s  1 s  Receive From Topic
+    ${body}=  Get Text
+    Should Be Equal  ${BODY_TEXT}  ${body}
+    Unsubscribe

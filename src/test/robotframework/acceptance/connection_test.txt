@@ -1,0 +1,20 @@
+*** Settings ***
+Library			JMSLibrary
+
+*** Variables ***
+${QUEUE}    	QUEUE.JMSLIBRARY.TEST
+${BODY_TEXT}    Hello world!
+${CLIENT_ID}    jmslibrary
+
+*** Test Cases ***
+
+Connection
+	Connect    org.apache.activemq.jndi.ActiveMQInitialContextFactory  tcp://localhost:61616?jms.useAsyncSend=false
+    Close
+
+Client Id
+    Connect    org.apache.activemq.jndi.ActiveMQInitialContextFactory  tcp://localhost:61616?jms.useAsyncSend=false
+    Set Client Id  ${CLIENT_ID}
+	${id}=  Get Client Id
+	Should Be Equal  ${id}  ${CLIENT_ID}
+    Close

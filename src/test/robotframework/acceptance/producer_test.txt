@@ -1,0 +1,53 @@
+*** Settings ***
+Documentation   Test suite which deals with settings related to session scope, hence modifications at some test case can have side effects at another one. Be careful.
+Library			JMSLibrary
+Suite Setup		Connect And Start    org.apache.activemq.jndi.ActiveMQInitialContextFactory  tcp://localhost:61616?jms.useAsyncSend=false
+Suite Teardown	Close
+Test Setup              Clear Queue  ${QUEUE}
+Test Tear Down          Clear Queue  ${QUEUE}
+
+*** Variables ***
+${QUEUE}    	QUEUE.JMSLIBRARY.TEST
+${BODY_TEXT}    Hello world!
+
+*** Test Cases ***
+
+Persistent Delivery Mode with Number
+    Set Producer Delivery Mode  2
+    ${v}=  Get Producer Delivery Mode
+    Should Be Equal  PERSISTENT  ${v}
+	Create Text Message  ${BODY_TEXT}
+	Send To Queue  ${QUEUE}
+	Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+	${v}=  Get Delivery Mode
+    Should Be Equal  PERSISTENT  ${v}
+    
+Non-Persistent Delivery Mode with Number
+    Set Producer Delivery Mode  1
+    ${v}=  Get Producer Delivery Mode
+    Should Be Equal  NON_PERSISTENT  ${v}
+	Create Text Message  ${BODY_TEXT}
+	Send To Queue  ${QUEUE}
+	Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+	${v}=  Get Delivery Mode
+    Should Be Equal  NON_PERSISTENT  ${v}
+
+Persistent Delivery Mode
+    Set Producer Delivery Mode  PERSISTENT
+    ${v}=  Get Producer Delivery Mode
+    Should Be Equal  PERSISTENT  ${v}
+	Create Text Message  ${BODY_TEXT}
+	Send To Queue  ${QUEUE}
+	Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+	${v}=  Get Delivery Mode
+    Should Be Equal  PERSISTENT  ${v}
+    
+Non-Persistent Delivery Mode
+    Set Producer Delivery Mode  NON_PERSISTENT
+    ${v}=  Get Producer Delivery Mode
+    Should Be Equal  NON_PERSISTENT  ${v}
+	Create Text Message  ${BODY_TEXT}
+	Send To Queue  ${QUEUE}
+	Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+	${v}=  Get Delivery Mode
+    Should Be Equal  NON_PERSISTENT  ${v}
