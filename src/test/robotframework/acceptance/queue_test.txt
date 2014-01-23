@@ -23,7 +23,7 @@ Send and Clear
     Send To Queue  ${QUEUE}
     Create Text Message  ${BODY_TEXT}
     Send To Queue  ${QUEUE}
-    Sleep  2 s
+#    Sleep  2 s
     ${c}=  Clear Queue  ${QUEUE}
     Should Be Equal As Integers  3  ${c}
 
