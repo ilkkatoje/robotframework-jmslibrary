@@ -11,7 +11,7 @@ import fi.toje.himmeli.jmslibrary.BrokerSession;
  * Set the library and chosen JMS provider into classpath and start testing.
  * 
  * Library uses one connection which has one session.
- * Session includes one message producer, one message consumer for queues and one message consumer for topics.
+ * Session includes one message producer and one message consumer for topics.
  * Producer specific settings (timeToLive etc.) apply within a session. Settings will be reset, if session is reinitialized.
  * 
  * = Example with ActiveMQ =
@@ -47,7 +47,7 @@ import fi.toje.himmeli.jmslibrary.BrokerSession;
 public class JMSLibrary {
 
 	public static final String ROBOT_LIBRARY_SCOPE = "TEST SUITE";
-	public static final String ROBOT_LIBRARY_VERSION = "1.0.0-alpha";
+	public static final String ROBOT_LIBRARY_VERSION = "1.0.0-beta-SNAPSHOT";
 	
 	private BrokerConnection brokerConnection;
 	
