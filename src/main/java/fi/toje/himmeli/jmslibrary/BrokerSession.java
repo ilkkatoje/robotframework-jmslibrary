@@ -2,7 +2,6 @@ package fi.toje.himmeli.jmslibrary;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -32,19 +31,19 @@ public class BrokerSession {
 	public static final String DELIVERY_MODE_PERSISTENT = "PERSISTENT";
 	public static final String DELIVERY_MODE_NON_PERSISTENT = "NON_PERSISTENT";
 	
-	private static final int DEFAULT_BUFFER = 8192; 
+	private static final int DEFAULT_BUFFER = 8192;
+	private static final long DEFAULT_RECEIVE_TIMEOUT = 100;
 	
 	private Connection connection;
 	private Session session;
 	private MessageProducer producer;
 	private long timeToLive = 0;
 	private int deliveryMode = DeliveryMode.PERSISTENT;
-	private MessageConsumer queueConsumer;
 	private MessageConsumer topicConsumer;
 	private HashMap<String, Queue> queues;
 	private HashMap<String, Topic> topics;
-	private Queue lastConsumedQueue;
 	private Message message;
+	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 	
 	public BrokerSession(Connection connection, boolean transacted, int type) throws JMSException {
 		this.connection = connection;
@@ -60,9 +59,6 @@ public class BrokerSession {
 	public void close() throws JMSException {
 		if (producer != null) {
 			producer.close();
-		}
-		if (queueConsumer != null) {
-			queueConsumer.close();
 		}
 		if (topicConsumer != null) {
 			topicConsumer.close();
@@ -242,7 +238,6 @@ public class BrokerSession {
 	 */
 	public String getProducerDeliveryMode() throws Exception {
 		int d;
-		String dm;
 		if (producer != null) {
 			d = producer.getDeliveryMode();
 		}
@@ -367,8 +362,9 @@ public class BrokerSession {
 	 */
 	public void receiveFromQueue(String queue) throws Exception {
 		message = null;
-		initQueueConsumer(queue);
-		message = queueConsumer.receiveNoWait();
+		MessageConsumer queueConsumer = session.createConsumer(getQueue(queue));
+		message = queueConsumer.receive(receiveTimeout);
+		queueConsumer.close();
 		if (message == null) {
 			throw new Exception("No message available");
 		}
@@ -480,6 +476,7 @@ public class BrokerSession {
 	 * @return message count in queue
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	public int queueDepth(String queue) throws Exception {
 		int depth = 0;
 		Queue q = getQueue(queue);
@@ -503,9 +500,9 @@ public class BrokerSession {
 	public int clearQueue(String queue) throws JMSException {
 		int count = 0;
 		Message lastMessage = null;
-		initQueueConsumer(queue);
+		MessageConsumer queueConsumer = session.createConsumer(getQueue(queue));
 		do {
-			lastMessage = queueConsumer.receiveNoWait();
+			lastMessage = queueConsumer.receive(receiveTimeout);
 			if (lastMessage != null) {
 				count++;
 				if (session.getTransacted()) {
@@ -520,28 +517,9 @@ public class BrokerSession {
 		}
 		while (lastMessage != null);
 		
+		queueConsumer.close();
+		
 		return count;
-	}
-	
-	/**
-	 * Initializes queue consumer. Uses existing consumer if available for queue.
-	 * 
-	 * @param queue
-	 * @throws JMSException
-	 */
-	private void initQueueConsumer(String queue) throws JMSException {
-		Queue q = getQueue(queue);
-		if (queueConsumer == null) {
-			queueConsumer = session.createConsumer(q);
-			lastConsumedQueue = q;
-		}
-		else {
-			if (!q.equals(lastConsumedQueue)) {
-				queueConsumer.close();
-				queueConsumer = session.createConsumer(q);
-				lastConsumedQueue = q;
-			}
-		}
 	}
 	
 	/**
