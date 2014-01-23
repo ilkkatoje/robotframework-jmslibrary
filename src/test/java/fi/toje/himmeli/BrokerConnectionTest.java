@@ -37,7 +37,7 @@ public class BrokerConnectionTest {
 	
 	@Test(expected=Exception.class)
 	public void convertType4() throws Exception {
-		int t = BrokerConnection.convertType("4");
+		BrokerConnection.convertType("4");
 	}
 	
 	@Test

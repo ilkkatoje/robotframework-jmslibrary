@@ -23,7 +23,7 @@ public class BrokerSessionTest {
 	
 	@Test(expected=Exception.class)
 	public void convertDeliveryModeWrong() throws Exception {
-		int dm = BrokerSession.convertDeliveryMode("WRONG");
+		BrokerSession.convertDeliveryMode("WRONG");
 	}
 	
 	@Test
@@ -40,6 +40,6 @@ public class BrokerSessionTest {
 	
 	@Test(expected=Exception.class)
 	public void convertDeliveryModeWrongInt() throws Exception {
-		String dm = BrokerSession.convertDeliveryMode(123);
+		BrokerSession.convertDeliveryMode(123);
 	}
 }
