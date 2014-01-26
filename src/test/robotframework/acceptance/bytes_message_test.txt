@@ -1,36 +1,37 @@
 *** Settings ***
-Library			JMSLibrary
+Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Library			OperatingSystem
-Suite Setup		Connect And Start  org.apache.activemq.jndi.ActiveMQInitialContextFactory  tcp://localhost:61616?jms.useAsyncSend=false
+Suite Setup		Connect And Start
 Suite Teardown  Close
 Test Setup      Clear Queue  ${QUEUE}
 Test Tear Down  Clear Queue  ${QUEUE}
 
 *** Variables ***
-${QUEUE}    	QUEUE.JMSLIBRARY.TEST
-${FILE1}         message.xml
-${FILE2}        message2.xml
-${TMP}          ${TEMPDIR}
+${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
+${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
+${QUEUE}                    QUEUE.JMSLIBRARY.TEST
+${FILE1}                    message.xml
+${FILE2}                    message2.xml
+${TMP}                      ${TEMPDIR}
 
 *** Test Cases ***
-
 Send and Receive BytesMessage
     ${s1}=  Get File Size  ${CURDIR}${/}${FILE1}
     Create Bytes Message From File  ${CURDIR}${/}${FILE1}
     Send To Queue  ${QUEUE}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     Write Bytes To File  ${TMP}${/}${FILE1}
     ${s2}=  Get File Size  ${TMP}${/}${FILE1}
     Should Be Equal As Integers  ${s2}  ${s1}
-    
+
 Send and Receive BytesMessage File Overwrite
     Create Bytes Message From File  ${CURDIR}${/}${FILE1}
     Send To Queue  ${QUEUE}
     Send To Queue  ${QUEUE}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     Write Bytes To File  ${TMP}${/}${FILE1}
     ${s1}=  Get File Size  ${TMP}${/}${FILE1}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     Write Bytes To File  ${TMP}${/}${FILE1}
     ${s2}=  Get File Size  ${TMP}${/}${FILE1}
     Should Be Equal As Integers  ${s2}  ${s1}  
@@ -39,7 +40,7 @@ Send and Receive Bigger BytesMessage
     ${s1}=  Get File Size  ${CURDIR}${/}${FILE2}
     Create Bytes Message From File  ${CURDIR}${/}${FILE2}
     Send To Queue  ${QUEUE}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     Write Bytes To File  ${TMP}${/}${FILE2}
     ${s2}=  Get File Size  ${TMP}${/}${FILE2}
     Should Be Equal As Integers  ${s2}  ${s1}

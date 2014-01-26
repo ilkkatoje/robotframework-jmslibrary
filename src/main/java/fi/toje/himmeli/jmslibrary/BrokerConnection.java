@@ -1,52 +1,17 @@
 package fi.toje.himmeli.jmslibrary;
 
-import java.util.Properties;
-
 import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Session;
-import javax.naming.Context;
-import javax.naming.InitialContext;
 
 public class BrokerConnection {
 	
-	private InitialContext jndi;
 	private Connection connection;
 	private BrokerSession brokerSession;
 	private boolean isStarted = false;
 	
-	public BrokerConnection(String initialContextFactory, String providerUrl) throws Exception {
-		Properties env = new Properties( );
-		env.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
-		env.put(Context.PROVIDER_URL, providerUrl);
-		 
-		initialize(env);
-	}
-	
-	/**
-	 * Creates Broker connection with default session (non-transacted and AUTO_ACKNOWLEDGE). Also starts the connection.
-	 * 
-	 * @param initialContextFactory
-	 * @param providerUrl
-	 * @param securityPrincipal
-	 * @param securityCredentials
-	 * @throws Exception 
-	 */
-	public BrokerConnection(String initialContextFactory, String providerUrl, String securityPrincipal, String securityCredentials) throws Exception {
-		Properties env = new Properties( );
-		env.put(Context.SECURITY_PRINCIPAL, securityPrincipal);
-		env.put(Context.SECURITY_CREDENTIALS, securityCredentials);
-		env.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
-		env.put(Context.PROVIDER_URL, providerUrl);
-		
-		initialize(env);
-	}
-	
-	private void initialize(Properties env) throws Exception {
-		jndi = new InitialContext(env);
-		ConnectionFactory connectionFactory = (ConnectionFactory)jndi.lookup("ConnectionFactory");
-		connection = connectionFactory.createConnection();
+	public BrokerConnection(Connection connection) throws Exception {
+		this.connection = connection;
 	}
 	
 	public void setClientId(String clientId) throws JMSException {

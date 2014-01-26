@@ -1,6 +1,12 @@
 import java.io.IOException;
+import java.util.Properties;
 
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 import fi.toje.himmeli.jmslibrary.BrokerConnection;
 import fi.toje.himmeli.jmslibrary.BrokerSession;
@@ -17,14 +23,16 @@ import fi.toje.himmeli.jmslibrary.BrokerSession;
  * = Example with ActiveMQ =
  * 
  * | *** Settings ***
- * | Library         JMSLibrary
- * | Suite Setup     Connect And Start  org.apache.activemq.jndi.ActiveMQInitialContextFactory  tcp://localhost:61616?jms.useAsyncSend=false
+ * | Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
+ * | Suite Setup     Connect And Start
  * | Suite Teardown  Close
  * |
  * | *** Variables ***
- * | ${QUEUE}    	QUEUE.JMSLIBRARY.TEST
- * | ${TOPIC}    	TOPIC.JMSLIBRARY.TEST
- * | ${BODY_TEXT}    Hello world!
+ * | ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
+ * | ${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
+ * | ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
+ * | ${TOPIC}                    TOPIC.JMSLIBRARY.TEST
+ * | ${BODY_TEXT}                Hello world!
  *  |
  * | *** Test Cases ***
  * | Queue Send and Receive TextMessage
@@ -49,40 +57,49 @@ public class JMSLibrary {
 	public static final String ROBOT_LIBRARY_SCOPE = "TEST SUITE";
 	public static final String ROBOT_LIBRARY_VERSION = "1.0.0-beta.2";
 	
+	private InitialContext jndi;
+	private ConnectionFactory connectionFactory;
 	private BrokerConnection brokerConnection;
 	
-	public JMSLibrary() {
-	}
-	
-	/**
-	 * Connects to broker. Does not start connection or initialize session.
-	 * 
-	 */
-	public void connect(String initialContextFactory, String providerUrl) throws Exception {
-		if (brokerConnection != null) {
-			throw new Exception("Connection exists");
-		}
-		brokerConnection = new BrokerConnection(initialContextFactory, providerUrl);
+	public JMSLibrary(String initialContextFactory, String providerUrl) throws NamingException {
+		Properties env = new Properties( );
+		env.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
+		env.put(Context.PROVIDER_URL, providerUrl);
 		
+		jndi = new InitialContext(env);
+		connectionFactory = (ConnectionFactory)jndi.lookup("ConnectionFactory");
 	}
 	
 	/**
 	 * Connects to broker. Does not start connection or initialize session.
 	 * 
 	 */
-	public void connect(String initialContextFactory, String providerUrl, String securityPrincipal, String securityCredentials) throws Exception {
+	public void connect() throws Exception {
 		if (brokerConnection != null) {
 			throw new Exception("Connection exists");
 		}
-		brokerConnection = new BrokerConnection(initialContextFactory, providerUrl, securityPrincipal, securityCredentials);
+		Connection connection = connectionFactory.createConnection();
+		brokerConnection = new BrokerConnection(connection);
+	}
+	
+	/**
+	 * Connects to broker. Does not start connection or initialize session.
+	 * 
+	 */
+	public void connect(String username, String password) throws Exception {
+		if (brokerConnection != null) {
+			throw new Exception("Connection exists");
+		}
+		Connection connection = connectionFactory.createConnection(username, password);
+		brokerConnection = new BrokerConnection(connection);
 	}
 	
 	/**
 	 * Connects to broker. Initializes default session and starts the connection.
 	 * 
 	 */
-	public void connectAndStart(String initialContextFactory, String providerUrl) throws Exception {
-		connect(initialContextFactory, providerUrl);
+	public void connectAndStart() throws Exception {
+		connect();
 		initializeSession();
 		start();
 	}
@@ -91,8 +108,8 @@ public class JMSLibrary {
 	 * Connects to broker. Initializes default session and starts the connection.
 	 * 
 	 */
-	public void connectAndStart(String initialContextFactory, String providerUrl, String securityPrincipal, String securityCredentials) throws Exception {
-		connect(initialContextFactory, providerUrl, securityPrincipal, securityCredentials);
+	public void connectAndStart(String username, String password) throws Exception {
+		connect(username, password);
 		initializeSession();
 		start();
 	}

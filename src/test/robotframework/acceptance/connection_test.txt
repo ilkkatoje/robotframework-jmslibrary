@@ -1,19 +1,29 @@
 *** Settings ***
-Library			JMSLibrary
+
+Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
+
+
 
 *** Variables ***
-${QUEUE}    	QUEUE.JMSLIBRARY.TEST
-${BODY_TEXT}    Hello world!
-${CLIENT_ID}    jmslibrary
+
+${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
+${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
+${QUEUE}                    QUEUE.JMSLIBRARY.TEST
+${BODY_TEXT}                Hello world!
+${CLIENT_ID}                jmslibrary
+
+
 
 *** Test Cases ***
 
 Connection
-	Connect    org.apache.activemq.jndi.ActiveMQInitialContextFactory  tcp://localhost:61616?jms.useAsyncSend=false
+	Connect
     Close
 
+
+
 Client Id
-    Connect    org.apache.activemq.jndi.ActiveMQInitialContextFactory  tcp://localhost:61616?jms.useAsyncSend=false
+    Connect
     Set Client Id  ${CLIENT_ID}
 	${id}=  Get Client Id
 	Should Be Equal  ${id}  ${CLIENT_ID}

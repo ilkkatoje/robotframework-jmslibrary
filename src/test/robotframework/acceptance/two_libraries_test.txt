@@ -1,33 +1,26 @@
 *** Settings ***
-
-Library         JMSLibrary  WITH NAME  jms1
-Library         JMSLibrary  WITH NAME  jms2
+Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}  WITH NAME  jms1
+Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}  WITH NAME  jms2
 Suite Setup     Initialize Suite
 Suite Teardown  Deinitialize Suite
 Test Setup      jms1.Clear Queue  ${QUEUE}
 Test Tear Down  jms1.Clear Queue  ${QUEUE}
 
-
-
 *** Variables ***
-
-${QUEUE}    	QUEUE.JMSLIBRARY.TEST
-${TOPIC}    	TOPIC.JMSLIBRARY.TEST
-${BODY_TEXT_1}    Hello world 1!
-${BODY_TEXT_2}    Hello world 2!
-
-
+${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
+${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
+${QUEUE}                    QUEUE.JMSLIBRARY.TEST
+${TOPIC}                    TOPIC.JMSLIBRARY.TEST
+${BODY_TEXT_1}              Hello world 1!
+${BODY_TEXT_2}              Hello world 2!
 
 *** Test Cases ***
-
 Queue Send and Receive TextMessage
     jms1.Create Text Message  ${BODY_TEXT_1}
     jms1.Send To Queue  ${QUEUE}
     Wait Until Keyword Succeeds  10 s  1 s  jms2.Receive From Queue  ${QUEUE}
     ${body}=  jms2.Get Text
     Should Be Equal  ${BODY_TEXT_1}  ${body}
-
-
 
 Topic Send and Receive TextMessage
     jms2.Subscribe  ${TOPIC}
@@ -38,15 +31,10 @@ Topic Send and Receive TextMessage
     Should Be Equal  ${BODY_TEXT_2}  ${body}
     jms2.Unsubscribe
 
-
-
 *** Keywords ***
-
 Initialize Suite
-    jms1.Connect And Start  org.apache.activemq.jndi.ActiveMQInitialContextFactory  tcp://localhost:61616?jms.useAsyncSend=false
-    jms2.Connect And Start  org.apache.activemq.jndi.ActiveMQInitialContextFactory  tcp://localhost:61616?jms.useAsyncSend=false
-
-
+    jms1.Connect And Start
+    jms2.Connect And Start
 
 Deinitialize Suite
     jms1.Close
