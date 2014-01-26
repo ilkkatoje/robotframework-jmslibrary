@@ -43,7 +43,7 @@ public class BrokerSession {
 	private HashMap<String, Queue> queues;
 	private HashMap<String, Topic> topics;
 	private Message message;
-	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
+	private long defaultReceiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 	
 	public BrokerSession(Connection connection, boolean transacted, int type) throws JMSException {
 		this.connection = connection;
@@ -363,7 +363,7 @@ public class BrokerSession {
 	public void receiveFromQueue(String queue) throws Exception {
 		message = null;
 		MessageConsumer queueConsumer = session.createConsumer(getQueue(queue));
-		message = queueConsumer.receive(receiveTimeout);
+		message = queueConsumer.receive(defaultReceiveTimeout);
 		queueConsumer.close();
 		if (message == null) {
 			throw new Exception("No message available");
@@ -438,7 +438,7 @@ public class BrokerSession {
 	 */
 	public void receiveFromTopic() throws Exception {
 		message = null;
-		message = topicConsumer.receiveNoWait();
+		message = topicConsumer.receive(defaultReceiveTimeout);
 		if (message == null) {
 			throw new Exception("No message available");
 		}
@@ -476,12 +476,11 @@ public class BrokerSession {
 	 * @return message count in queue
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
 	public int queueDepth(String queue) throws Exception {
 		int depth = 0;
 		Queue q = getQueue(queue);
 		QueueBrowser browser = session.createBrowser(q);
-		Enumeration e = browser.getEnumeration();
+		Enumeration<?> e = browser.getEnumeration();
 		while (e.hasMoreElements()) {
 			e.nextElement();
 			depth++;
@@ -502,7 +501,7 @@ public class BrokerSession {
 		Message lastMessage = null;
 		MessageConsumer queueConsumer = session.createConsumer(getQueue(queue));
 		do {
-			lastMessage = queueConsumer.receive(receiveTimeout);
+			lastMessage = queueConsumer.receive(defaultReceiveTimeout);
 			if (lastMessage != null) {
 				count++;
 				if (session.getTransacted()) {
@@ -532,7 +531,7 @@ public class BrokerSession {
 		int count = 0;
 		Message lastMessage = null;
 		do {
-			lastMessage = topicConsumer.receiveNoWait();
+			lastMessage = topicConsumer.receive(defaultReceiveTimeout);
 			if (lastMessage != null) {
 				count++;
 				if (session.getTransacted()) {
