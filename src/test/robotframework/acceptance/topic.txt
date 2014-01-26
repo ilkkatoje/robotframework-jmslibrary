@@ -33,6 +33,16 @@ Topic Subscriber
     Should be Equal  ${pid}  ${PROPERTY_VALUE}
     Unsubscribe
 
+Topic Subscriber With Receive Timeout
+    Subscribe  ${TOPIC}
+    Create Text Message  ${BODY_TEXT}
+    Set String Property  ${PROPERTY_NAME}  ${PROPERTY_VALUE}  
+    Send To Topic  ${TOPIC}
+    Receive From Topic  1000
+    ${pid}=  Get String Property  ${PROPERTY_NAME}
+    Should be Equal  ${pid}  ${PROPERTY_VALUE}
+    Unsubscribe
+
 Topic Subscriber Clear 
     Subscribe  ${TOPIC}
     Create Text Message  ${BODY_TEXT}  

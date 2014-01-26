@@ -49,7 +49,14 @@ Send and Receive TextMessage
     Receive From Queue  ${QUEUE}
     ${body}=  Get Text
     Should Be Equal  ${BODY_TEXT}  ${body}
-    
+
+Send and Receive TextMessage With Timeout
+    Create Text Message  ${BODY_TEXT}
+    Send To Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}  1000
+    ${body}=  Get Text
+    Should Be Equal  ${BODY_TEXT}  ${body}
+
 Send and Receive TextMessage with Property
     ${property}  Set Variable  the_value
     Create Text Message  ${BODY_TEXT}
