@@ -17,8 +17,10 @@ import fi.toje.himmeli.jmslibrary.BrokerSession;
  * Set the library and chosen JMS provider into classpath and start testing.
  * 
  * Library uses one connection which has one session.
- * Session includes one message producer and one message consumer for topics.
+ * Session includes one message producer and one message consumer for topic.
  * Producer specific settings (timeToLive etc.) apply within a session. Settings will be reset, if session is reinitialized.
+ * 
+ * Default receive timeout is 100 ms.
  * 
  * = Example with ActiveMQ =
  * 
@@ -61,6 +63,9 @@ public class JMSLibrary {
 	private ConnectionFactory connectionFactory;
 	private BrokerConnection brokerConnection;
 	
+	/**
+	 * Settings for selecting JMS provider.
+	 */
 	public JMSLibrary(String initialContextFactory, String providerUrl) throws NamingException {
 		Properties env = new Properties( );
 		env.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
@@ -393,13 +398,23 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Receives (using message.receiveNoWait()) message from queue. The message is set to internal message object and its body and
+	 * Receives message from queue. The message is set to internal message object and its body and
 	 * properties can be accessed via methods.
 	 * 
 	 */
 	public void receiveFromQueue(String queue) throws Exception {
 		BrokerSession bs = brokerConnection.getBrokerSession();
 		bs.receiveFromQueue(queue);
+	}
+	
+	/**
+	 * Receives message from queue. The message is set to internal message object and its body and
+	 * properties can be accessed via methods.
+	 * 
+	 */
+	public void receiveFromQueue(String queue, long timeout) throws Exception {
+		BrokerSession bs = brokerConnection.getBrokerSession();
+		bs.receiveFromQueue(queue, timeout);
 	}
 	
 	/**
@@ -457,6 +472,15 @@ public class JMSLibrary {
 	public void receiveFromTopic() throws Exception {
 		BrokerSession bs = brokerConnection.getBrokerSession();
 		bs.receiveFromTopic();
+	}
+	
+	/**
+	 * Subscribe (Subscribe Durable) must have been called before this.
+	 * 
+	 */
+	public void receiveFromTopic(long timeout) throws Exception {
+		BrokerSession bs = brokerConnection.getBrokerSession();
+		bs.receiveFromTopic(timeout);
 	}
 	
 	/**

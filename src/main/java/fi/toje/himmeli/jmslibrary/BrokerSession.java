@@ -361,9 +361,20 @@ public class BrokerSession {
 	 * @throws Exception if no message available
 	 */
 	public void receiveFromQueue(String queue) throws Exception {
+		receiveFromQueue(queue, defaultReceiveTimeout);
+	}
+	
+	/**
+	 * Receives message from queue. Uses existing queueConsumer if available and having the same destination.
+	 * 
+	 * @param queue
+	 * @param timeout
+	 * @throws Exception
+	 */
+	public void receiveFromQueue(String queue, long timeout) throws Exception {
 		message = null;
 		MessageConsumer queueConsumer = session.createConsumer(getQueue(queue));
-		message = queueConsumer.receive(defaultReceiveTimeout);
+		message = queueConsumer.receive(timeout);
 		queueConsumer.close();
 		if (message == null) {
 			throw new Exception("No message available");
@@ -437,8 +448,18 @@ public class BrokerSession {
 	 * @throws Exception
 	 */
 	public void receiveFromTopic() throws Exception {
+		receiveFromTopic(defaultReceiveTimeout);
+	}
+	
+	/**
+	 * Subscribe (Durable) must have been called before this.
+	 * 
+	 * @param timeout
+	 * @throws Exception
+	 */
+	public void receiveFromTopic(long timeout) throws Exception {
 		message = null;
-		message = topicConsumer.receive(defaultReceiveTimeout);
+		message = topicConsumer.receive(timeout);
 		if (message == null) {
 			throw new Exception("No message available");
 		}
