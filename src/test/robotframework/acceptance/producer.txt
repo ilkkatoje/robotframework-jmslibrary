@@ -19,7 +19,7 @@ Persistent Delivery Mode with Number
     Should Be Equal  PERSISTENT  ${v}
 	Create Text Message  ${BODY_TEXT}
 	Send To Queue  ${QUEUE}
-	Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+	Receive From Queue  ${QUEUE}
 	${v}=  Get Delivery Mode
     Should Be Equal  PERSISTENT  ${v}
 
@@ -29,7 +29,7 @@ Non-Persistent Delivery Mode with Number
     Should Be Equal  NON_PERSISTENT  ${v}
 	Create Text Message  ${BODY_TEXT}
 	Send To Queue  ${QUEUE}
-	Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+	Receive From Queue  ${QUEUE}
 	${v}=  Get Delivery Mode
     Should Be Equal  NON_PERSISTENT  ${v}
 
@@ -39,7 +39,7 @@ Persistent Delivery Mode
     Should Be Equal  PERSISTENT  ${v}
 	Create Text Message  ${BODY_TEXT}
 	Send To Queue  ${QUEUE}
-	Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+	Receive From Queue  ${QUEUE}
 	${v}=  Get Delivery Mode
     Should Be Equal  PERSISTENT  ${v}
 
@@ -49,6 +49,6 @@ Non-Persistent Delivery Mode
     Should Be Equal  NON_PERSISTENT  ${v}
 	Create Text Message  ${BODY_TEXT}
 	Send To Queue  ${QUEUE}
-	Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+	Receive From Queue  ${QUEUE}
 	${v}=  Get Delivery Mode
     Should Be Equal  NON_PERSISTENT  ${v}

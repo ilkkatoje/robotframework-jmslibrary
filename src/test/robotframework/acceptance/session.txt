@@ -17,7 +17,7 @@ Send Client Acknowledged
     Initialize Session  false  2
     Create Text Message  ${BODY_TEXT}
     Send To Queue  ${QUEUE}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     Acknowledge
     ${r}=  Get Redelivered
 
@@ -26,9 +26,9 @@ Transaction
     Create Text Message  ${BODY_TEXT}
     Send To Queue  ${QUEUE}
     Commit
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     Rollback
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     Commit
     ${c}=  Clear Queue  ${QUEUE}
     Should Be Equal As Integers  0  ${c}
@@ -37,7 +37,7 @@ Not Redelivered
     Initialize Session  false  CLIENT_ACKNOWLEDGE
     Create Text Message  ${BODY_TEXT}
     Send To Queue  ${QUEUE}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     ${t}=  Get Redelivered
     Should Not Be True  ${t}
     Acknowledge
@@ -46,9 +46,9 @@ Redelivered
     Initialize Session  false  CLIENT_ACKNOWLEDGE
     Create Text Message  ${BODY_TEXT}
     Send To Queue  ${QUEUE}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     Initialize Session  false  CLIENT_ACKNOWLEDGE
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     Acknowledge
     ${t}=  Get Redelivered
     Should Be True  ${t}

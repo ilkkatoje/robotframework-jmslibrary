@@ -40,7 +40,7 @@ import fi.toje.himmeli.jmslibrary.BrokerSession;
  * | Queue Send and Receive TextMessage
  * |     Create Text Message  ${BODY_TEXT}
  * |     Send To Queue  ${QUEUE}
- * |     Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+ * |     Receive From Queue  ${QUEUE}
  * |     ${body}=  Get Text
  * |     Should Be Equal  ${BODY_TEXT}  ${body}
  * |
@@ -48,7 +48,7 @@ import fi.toje.himmeli.jmslibrary.BrokerSession;
  * |     Subscribe  ${TOPIC}
  * |     Create Text Message  ${BODY_TEXT}
  * |     Send To Topic  ${TOPIC}
- * |     Wait Until Keyword Succeeds  10 s  1 s  Receive From Topic
+ * |     Receive From Topic
  * |     ${body}=  Get Text
  * |     Should Be Equal  ${BODY_TEXT}  ${body}
  * |     Unsubscribe

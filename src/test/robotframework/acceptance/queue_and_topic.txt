@@ -28,7 +28,7 @@ Setup
 Send and Receive TextMessage
     Create Text Message  ${BODY_TEXT}
     Send To Queue  ${QUEUE}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     ${body}=  Get Text
     Should Be Equal  ${BODY_TEXT}  ${body}
 
@@ -37,7 +37,7 @@ Durable Topic Subscriber
     Create Text Message  ${BODY_TEXT}
     Set String Property  ${PROPERTY_NAME}  ${PROPERTY_VALUE}  
     Send To Topic  ${TOPIC}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Topic
+    Receive From Topic
     ${pid}=  Get String Property  ${PROPERTY_NAME}
     Should be Equal  ${pid}  ${PROPERTY_VALUE}
     Unsubscribe Durable  ${SUBSCRIPTION_NAME}

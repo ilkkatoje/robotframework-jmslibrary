@@ -46,7 +46,7 @@ Double Send
 Send and Receive TextMessage
     Create Text Message  ${BODY_TEXT}
     Send To Queue  ${QUEUE}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     ${body}=  Get Text
     Should Be Equal  ${BODY_TEXT}  ${body}
     
@@ -55,7 +55,7 @@ Send and Receive TextMessage with Property
     Create Text Message  ${BODY_TEXT}
     Set String Property  ownProp  ${property}
     Send To Queue  ${QUEUE}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     ${receivedProperty}=  Get String Property  ownProp
     Should Be Equal As Strings  ${receivedProperty}  ${property}
 
@@ -71,7 +71,7 @@ Set Type
     Create Text Message  ${BODY_TEXT}
     Set Type  txt
     Send To Queue  ${QUEUE}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     ${type}=  Get Type
     Should Be Equal As Strings  ${type}  txt
 
@@ -79,7 +79,7 @@ Correlation Id
     Create Text Message  ${BODY_TEXT}
     Set Correlation Id  123
     Send To Queue  ${QUEUE}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     ${cid}=  Get Correlation Id
     Should Be Equal As Strings  ${cid}  123
 
@@ -87,7 +87,7 @@ Reply To Queue with Queue
     Create Text Message  ${BODY_TEXT}
     Set Reply To Queue  Q.TEST.REPLY
     Send To Queue  ${QUEUE}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     ${r}=  Get Reply To Queue
     Should Be Equal As Strings  ${r}  Q.TEST.REPLY
 
@@ -95,7 +95,7 @@ Reply To Queue with Topic
     Create Text Message  ${BODY_TEXT}
     Set Reply To Topic  ${TOPIC}
     Send To Queue  ${QUEUE}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     ${q}=  Get Reply To Queue
     Should Be Equal As Strings  ${q}  None
 
@@ -103,7 +103,7 @@ Reply To Topic with Topic
     Create Text Message  ${BODY_TEXT}
     Set Reply To Topic  ${TOPIC}
     Send To Queue  ${QUEUE}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     ${t}=  Get Reply To Topic
     Should Be Equal As Strings  ${t}  ${TOPIC}
 
@@ -111,7 +111,7 @@ Reply To Topic with Queue
     Create Text Message  ${BODY_TEXT}
     Set Reply To Queue  Q.TEST.REPLY
     Send To Queue  ${QUEUE}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     ${t}=  Get Reply To Topic
     Should Be Equal As Strings  ${t}  None
 
@@ -119,7 +119,7 @@ Producer TimeToLive and Message Expiration
     Create Text Message  ${BODY_TEXT}
     Set Producer Time To Live  20000
     Send To Queue  ${QUEUE}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Queue  ${QUEUE}
+    Receive From Queue  ${QUEUE}
     ${v}=  Get Expiration
     ${e}=  Evaluate  ${v} > 0
     Should Be True  ${e}

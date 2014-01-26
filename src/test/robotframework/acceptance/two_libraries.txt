@@ -18,7 +18,7 @@ ${BODY_TEXT_2}              Hello world 2!
 Queue Send and Receive TextMessage
     jms1.Create Text Message  ${BODY_TEXT_1}
     jms1.Send To Queue  ${QUEUE}
-    Wait Until Keyword Succeeds  10 s  1 s  jms2.Receive From Queue  ${QUEUE}
+    jms2.Receive From Queue  ${QUEUE}
     ${body}=  jms2.Get Text
     Should Be Equal  ${BODY_TEXT_1}  ${body}
 
@@ -26,7 +26,7 @@ Topic Send and Receive TextMessage
     jms2.Subscribe  ${TOPIC}
     jms1.Create Text Message  ${BODY_TEXT_2}
     jms1.Send To Topic  ${TOPIC}
-    Wait Until Keyword Succeeds  10 s  1 s  jms2.Receive From Topic
+    jms2.Receive From Topic
     ${body}=  jms2.Get Text
     Should Be Equal  ${BODY_TEXT_2}  ${body}
     jms2.Unsubscribe

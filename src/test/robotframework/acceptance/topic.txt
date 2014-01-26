@@ -28,7 +28,7 @@ Topic Subscriber
     Create Text Message  ${BODY_TEXT}
     Set String Property  ${PROPERTY_NAME}  ${PROPERTY_VALUE}  
     Send To Topic  ${TOPIC}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Topic
+    Receive From Topic
     ${pid}=  Get String Property  ${PROPERTY_NAME}
     Should be Equal  ${pid}  ${PROPERTY_VALUE}
     Unsubscribe
@@ -48,7 +48,7 @@ Durable Topic Subscriber
     Create Text Message  ${BODY_TEXT}
     Set String Property  ${PROPERTY_NAME}  ${PROPERTY_VALUE}
     Send To Topic  ${TOPIC_D}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Topic
+    Receive From Topic
     ${pid}=  Get String Property  ${PROPERTY_NAME}
     Should be Equal  ${pid}  ${PROPERTY_VALUE}
     Unsubscribe Durable  ${SUBSCRIPTION_NAME}
@@ -60,7 +60,7 @@ Durable Topic Subscriber with Unsubscribe
     Set String Property  ${PROPERTY_NAME}  ${PROPERTY_VALUE}
     Send To Topic  ${TOPIC_D}
     Subscribe Durable  ${TOPIC_D}   ${SUBSCRIPTION_NAME}
-    Wait Until Keyword Succeeds  10 s  1 s  Receive From Topic
+    Receive From Topic
     ${pid}=  Get String Property  ${PROPERTY_NAME}
     Should be Equal  ${pid}  ${PROPERTY_VALUE}
     Unsubscribe Durable  ${SUBSCRIPTION_NAME}
