@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>fi.toje.himmeli</groupId>
 	<artifactId>robotframework-jmslibrary</artifactId>
-	<version>1.0.0-beta</version>
+	<version>1.0.0-beta.2-SNAPSHOT</version>
 	<name>Robot Framework JMSLibrary</name>
 	<packaging>jar</packaging>
 	<description>Robot framework library for testing applications utilizing JMS.</description>
@@ -21,7 +21,7 @@
 			<plugin>
 				<groupId>org.robotframework</groupId>
 				<artifactId>robotframework-maven-plugin</artifactId>
-				<version>1.3</version>
+				<version>1.4</version>
 				<configuration>
 					<libdoc>
 						<outputFile>robotframework-jmslibrary.html</outputFile>
