@@ -58,6 +58,7 @@ public class JMSLibrary {
 
 	public static final String ROBOT_LIBRARY_SCOPE = "TEST SUITE";
 	public static final String ROBOT_LIBRARY_VERSION = "1.0.0-beta.2";
+	public static final String DEFAULT_JNDI_CONNECTION_FACTORY_NAME = "ConnectionFactory";
 	
 	private InitialContext jndi;
 	private ConnectionFactory connectionFactory;
@@ -65,6 +66,8 @@ public class JMSLibrary {
 	
 	/**
 	 * Settings for selecting JMS provider.
+	 * 
+	 * * Default JNDI connection factory look up string: ConnectionFactory
 	 * 
 	 * Example:
 	 * | Library | JMSLibrary | org.apache.activemq.jndi.ActiveMQInitialContextFactory | tcp://localhost:61616?jms.useAsyncSend=false |
