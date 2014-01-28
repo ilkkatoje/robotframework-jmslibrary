@@ -67,7 +67,7 @@ public class JMSLibrary {
 	/**
 	 * Settings for selecting JMS provider.
 	 * 
-	 * * Default JNDI connection factory look up string: ConnectionFactory
+	 * Default JNDI connection factory look up string: ConnectionFactory
 	 * 
 	 * Example:
 	 * | Library | JMSLibrary | org.apache.activemq.jndi.ActiveMQInitialContextFactory | tcp://localhost:61616?jms.useAsyncSend=false |
