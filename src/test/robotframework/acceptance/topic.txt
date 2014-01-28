@@ -1,4 +1,5 @@
 *** Settings ***
+Library         String
 Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Suite Setup		Setup
 Suite Teardown  Close
@@ -24,23 +25,25 @@ Setup
 
 *** Test Cases ***
 Topic Subscriber
+    ${pvalue}=  Generate Random String
     Subscribe  ${TOPIC}
     Create Text Message  ${BODY_TEXT}
-    Set String Property  ${PROPERTY_NAME}  ${PROPERTY_VALUE}  
+    Set String Property  ${PROPERTY_NAME}  ${pvalue}
     Send To Topic  ${TOPIC}
     Receive From Topic
     ${pid}=  Get String Property  ${PROPERTY_NAME}
-    Should be Equal  ${pid}  ${PROPERTY_VALUE}
+    Should be Equal  ${pid}  ${pvalue}
     Unsubscribe
 
 Topic Subscriber With Receive Timeout
+    ${pvalue}=  Generate Random String
     Subscribe  ${TOPIC}
     Create Text Message  ${BODY_TEXT}
-    Set String Property  ${PROPERTY_NAME}  ${PROPERTY_VALUE}  
+    Set String Property  ${PROPERTY_NAME}  ${pvalue}
     Send To Topic  ${TOPIC}
     Receive From Topic  1000
     ${pid}=  Get String Property  ${PROPERTY_NAME}
-    Should be Equal  ${pid}  ${PROPERTY_VALUE}
+    Should be Equal  ${pid}  ${pvalue}
     Unsubscribe
 
 Topic Subscriber Clear 
@@ -54,13 +57,14 @@ Topic Subscriber Clear
     Unsubscribe
 
 Durable Topic Subscriber
+    ${pvalue}=  Generate Random String
     Subscribe Durable  ${TOPIC_D}   ${SUBSCRIPTION_NAME}
     Create Text Message  ${BODY_TEXT}
-    Set String Property  ${PROPERTY_NAME}  ${PROPERTY_VALUE}
+    Set String Property  ${PROPERTY_NAME}  ${pvalue}
     Send To Topic  ${TOPIC_D}
     Receive From Topic
     ${pid}=  Get String Property  ${PROPERTY_NAME}
-    Should be Equal  ${pid}  ${PROPERTY_VALUE}
+    Should be Equal  ${pid}  ${pvalue}
     Unsubscribe Durable  ${SUBSCRIPTION_NAME}
 
 Durable Topic Subscriber with Unsubscribe

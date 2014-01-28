@@ -1,4 +1,5 @@
 *** Settings ***
+Library         String
 Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}  WITH NAME  jms1
 Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}  WITH NAME  jms2
 Suite Setup     Initialize Suite
@@ -16,19 +17,21 @@ ${BODY_TEXT_2}              Hello world 2!
 
 *** Test Cases ***
 Queue Send and Receive TextMessage
-    jms1.Create Text Message  ${BODY_TEXT_1}
+    ${text}=  Generate Random String
+    jms1.Create Text Message  ${text}
     jms1.Send To Queue  ${QUEUE}
     jms2.Receive From Queue  ${QUEUE}
     ${body}=  jms2.Get Text
-    Should Be Equal  ${BODY_TEXT_1}  ${body}
+    Should Be Equal  ${body}  ${text}
 
 Topic Send and Receive TextMessage
+    ${text}=  Generate Random String
     jms2.Subscribe  ${TOPIC}
-    jms1.Create Text Message  ${BODY_TEXT_2}
+    jms1.Create Text Message  ${text}
     jms1.Send To Topic  ${TOPIC}
     jms2.Receive From Topic
     ${body}=  jms2.Get Text
-    Should Be Equal  ${BODY_TEXT_2}  ${body}
+    Should Be Equal  ${body}  ${text}
     jms2.Unsubscribe
 
 *** Keywords ***

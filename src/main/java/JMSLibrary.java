@@ -17,7 +17,7 @@ import fi.toje.himmeli.jmslibrary.BrokerSession;
  * Set the library and chosen JMS provider into classpath and start testing.
  * 
  * Library uses one connection which has one session.
- * Session includes one message producer and one message consumer for topic.
+ * Session includes one message producer and one message consumer for topic. Currently, messages can be received from only one topic at time.
  * Producer specific settings (timeToLive etc.) apply within a session. Settings will be reset, if session is reinitialized.
  * 
  * Default receive timeout is 100 ms.
@@ -35,7 +35,7 @@ import fi.toje.himmeli.jmslibrary.BrokerSession;
  * | ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
  * | ${TOPIC}                    TOPIC.JMSLIBRARY.TEST
  * | ${BODY_TEXT}                Hello world!
- *  |
+ * |
  * | *** Test Cases ***
  * | Queue Send and Receive TextMessage
  * |     Create Text Message  ${BODY_TEXT}
@@ -65,6 +65,9 @@ public class JMSLibrary {
 	
 	/**
 	 * Settings for selecting JMS provider.
+
+	 * Example:
+	 * | Library | JMSLibrary | org.apache.activemq.jndi.ActiveMQInitialContextFactory | tcp://localhost:61616?jms.useAsyncSend=false |
 	 */
 	public JMSLibrary(String initialContextFactory, String providerUrl) throws NamingException {
 		Properties env = new Properties( );
@@ -80,11 +83,7 @@ public class JMSLibrary {
 	 * 
 	 */
 	public void connect() throws Exception {
-		if (brokerConnection != null) {
-			throw new Exception("Connection exists");
-		}
-		Connection connection = connectionFactory.createConnection();
-		brokerConnection = new BrokerConnection(connection);
+		connect(null, null);
 	}
 	
 	/**
@@ -95,7 +94,14 @@ public class JMSLibrary {
 		if (brokerConnection != null) {
 			throw new Exception("Connection exists");
 		}
-		Connection connection = connectionFactory.createConnection(username, password);
+		Connection connection;
+		if (username != null) {
+			connection = connectionFactory.createConnection(username, password);
+		}
+		else {
+			connection = connectionFactory.createConnection();
+		}
+		
 		brokerConnection = new BrokerConnection(connection);
 	}
 	
@@ -128,7 +134,7 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Return clientId
+	 * Returns clientId.
 	 */
 	public String getClientId() throws JMSException {
 		return brokerConnection.getClientId();
@@ -139,15 +145,15 @@ public class JMSLibrary {
 	 * 
 	 */
 	public void initializeSession() throws Exception {
-		brokerConnection.initSession(false, BrokerSession.AUTO_ACKNOWLEDGE);
+		initializeSession(false, BrokerSession.AUTO_ACKNOWLEDGE);
 	}
 	
 	/**
 	 * (Re)initializes session for current connection.
 	 * 
-	 * transacted true / false
-	 * 
-	 * type AUTO_ACKNOWLEDGE, CLIENT_ACKNOWLEDGE, DUPS_OK_ACKNOWLEDGE, SESSION_TRANSACTED
+	 * Arguments:
+	 * - _transacted_: true or false
+	 * - _type_: AUTO_ACKNOWLEDGE, CLIENT_ACKNOWLEDGE, DUPS_OK_ACKNOWLEDGE or SESSION_TRANSACTED
 	 * 
 	 */
 	public void initializeSession(boolean transacted, String type) throws Exception {
@@ -202,13 +208,16 @@ public class JMSLibrary {
 	 * Creates TextMessage. Additional properties can be set after creation.
 	 * 
 	 */
-	public void createTextMessage(String body) throws Exception {
+	public void createTextMessage(String text) throws Exception {
 		BrokerSession bs = brokerConnection.getBrokerSession();
-		bs.createTextMessage(body);
+		bs.createTextMessage(text);
 	}
 	
 	/**
 	 * Creates BytesMessage from file. Additional properties can be set after creation.
+	 * 
+	 * Argument:
+	 * - _file_: filepath
 	 * 
 	 */
 	public void createBytesMessageFromFile(String file) throws JMSException, IOException {
@@ -220,7 +229,7 @@ public class JMSLibrary {
 	 * Sets JMSType of message.
 	 * 
 	 */
-	public void setType(String type) throws JMSException {
+	public void setJMSType(String type) throws JMSException {
 		BrokerSession bs = brokerConnection.getBrokerSession();
 		bs.setType(type);
 	}
@@ -229,7 +238,7 @@ public class JMSLibrary {
 	 * Returns JMSType of message.
 	 * 
 	 */
-	public String getType() throws JMSException {
+	public String getJMSType() throws JMSException {
 		BrokerSession bs = brokerConnection.getBrokerSession();
 		return bs.getType();
 	}
@@ -238,7 +247,7 @@ public class JMSLibrary {
 	 * Sets JMSCorrelationID for message.
 	 * 
 	 */
-	public void setCorrelationId(String correlationId) throws JMSException {
+	public void setJMSCorrelationId(String correlationId) throws JMSException {
 		BrokerSession bs = brokerConnection.getBrokerSession();
 		bs.setCorrelationId(correlationId);
 	}
@@ -247,7 +256,7 @@ public class JMSLibrary {
 	 * Returns JMSCorrelationID of message.
 	 * 
 	 */
-	public String getCorrelationId() throws JMSException {
+	public String getJMSCorrelationId() throws JMSException {
 		BrokerSession bs = brokerConnection.getBrokerSession();
 		return bs.getCorrelationId();
 	}
@@ -256,7 +265,7 @@ public class JMSLibrary {
 	 * Sets JMSReplyTo queue for message.
 	 * 
 	 */
-	public void setReplyToQueue(String queue) throws JMSException {
+	public void setJMSReplyToQueue(String queue) throws JMSException {
 		BrokerSession bs = brokerConnection.getBrokerSession();
 		bs.setReplyToQueue(queue);
 	}
@@ -264,10 +273,10 @@ public class JMSLibrary {
 	/**
 	 * JMSReplyTo queue of message.
 	 * 
-	 * Return queue if it was set and was type of queue, otherwise (not set or is topic) null 
+	 * Returns queue if it was set and was type of queue, otherwise (not set or is topic) null 
 	 * 
 	 */
-	public String getReplyToQueue() throws JMSException {
+	public String getJMSReplyToQueue() throws JMSException {
 		BrokerSession bs = brokerConnection.getBrokerSession();
 		return bs.getReplyToQueue();
 	}
@@ -276,7 +285,7 @@ public class JMSLibrary {
 	 * Sets JMSReplyTo topic for message.
 	 * 
 	 */
-	public void setReplyToTopic(String topic) throws JMSException {
+	public void setJMSReplyToTopic(String topic) throws JMSException {
 		BrokerSession bs = brokerConnection.getBrokerSession();
 		bs.setReplyToTopic(topic);
 	}
@@ -284,16 +293,19 @@ public class JMSLibrary {
 	/**
 	 * JMSReplyTo value of message.
 	 * 
-	 * Return topic if it was set and was type of topic, otherwise (not set or is queue) null 
+	 * Returns topic if it was set and was type of topic, otherwise (not set or is queue) null 
 	 * 
 	 */
-	public String getReplyToTopic() throws JMSException {
+	public String getJMSReplyToTopic() throws JMSException {
 		BrokerSession bs = brokerConnection.getBrokerSession();
 		return bs.getReplyToTopic();
 	}
 	
 	/**
 	 * Sets time to live for the producer.
+	 * 
+	 * Argument:
+	 * - _timeToLive_: time to live in milliseconds
 	 * 
 	 */
 	public void setProducerTimeToLive(long timeToLive) throws JMSException {
@@ -304,10 +316,10 @@ public class JMSLibrary {
 	/**
 	 * JMSExpiration of received message.
 	 * 
-	 * Return expiration of message
+	 * Returns expiration of message
 	 * 
 	 */
-	public long getExpiration() throws JMSException {
+	public long getJMSExpiration() throws JMSException {
 		BrokerSession bs = brokerConnection.getBrokerSession();
 		return bs.getExpiration();
 	}
@@ -315,7 +327,8 @@ public class JMSLibrary {
 	/**
 	 * Sets delivery mode for the producer.
 	 * 
-	 * deliveryMode = PERSISTENT or NON_PERSISTENT
+	 * Argument:
+	 * - _deliveryMode_: PERSISTENT or NON_PERSISTENT
 	 * 
 	 */
 	public void setProducerDeliveryMode(String deliveryMode) throws Exception {
@@ -347,7 +360,7 @@ public class JMSLibrary {
 	 * Return true if message was redelivered
 	 * 
 	 */
-	public boolean getRedelivered() throws JMSException {
+	public boolean getJMSRedelivered() throws JMSException {
 		BrokerSession bs = brokerConnection.getBrokerSession();
 		return bs.getJmsRedelivered();
 	}
@@ -365,6 +378,9 @@ public class JMSLibrary {
 	/**
 	 * Returns string property of message.
 	 * 
+	 * Arguments:
+	 * - _name_: name of the property
+	 * 
 	 */
 	public String getStringProperty(String name) throws Exception {
 		BrokerSession bs = brokerConnection.getBrokerSession();
@@ -379,7 +395,7 @@ public class JMSLibrary {
 	 * 
 	 * Returns message id.
 	 */
-	public String getMessageId() throws JMSException {
+	public String getJMSMessageId() throws JMSException {
 		BrokerSession bs = brokerConnection.getBrokerSession();
 		String id = bs.getMessageId();
 		System.out.println("MessageId=" + id);
@@ -411,6 +427,9 @@ public class JMSLibrary {
 	 * Receives message from queue. The message is set to internal message object and its body and
 	 * properties can be accessed via methods.
 	 * 
+	 * Arguments:
+	 * - _queue_
+	 * - _timeout_: timeout in milliseconds
 	 */
 	public void receiveFromQueue(String queue, long timeout) throws Exception {
 		BrokerSession bs = brokerConnection.getBrokerSession();
@@ -448,7 +467,9 @@ public class JMSLibrary {
 	/**
 	 * Subscribes durably to topic. Receive From Topic can be called after.
 	 * 
-	 * name is durable subscription name
+	 * Arguments:
+	 * - _topic_: topic name
+	 * - _name_: subscription name
 	 * 
 	 */
 	public void subscribeDurable(String topic, String name) throws JMSException {
@@ -459,6 +480,8 @@ public class JMSLibrary {
 	/**
 	 * Unsubscribes from topic and closes topic consumer.
 	 * 
+	 * Argument:
+	 * - _name_: subscription name
 	 */
 	public void unsubscribeDurable(String name) throws JMSException {
 		BrokerSession bs = brokerConnection.getBrokerSession();
@@ -476,6 +499,9 @@ public class JMSLibrary {
 	
 	/**
 	 * Subscribe (Subscribe Durable) must have been called before this.
+	 * 
+	 * Arguments:
+	 * - _timeout_: timeout in milliseconds
 	 * 
 	 */
 	public void receiveFromTopic(long timeout) throws Exception {

@@ -38,9 +38,9 @@ Queue Depth
 Double Send
     Create Text Message  ${BODY_TEXT}
     Send To Queue  ${QUEUE}
-    ${v1}=  Get Message Id
+    ${v1}=  Get JMS Message Id
     Send To Queue  ${QUEUE}
-    ${v2}=  Get Message Id
+    ${v2}=  Get JMS Message Id
     Should Not Be Equal  ${v1}  ${v2}
 
 Send and Receive TextMessage
@@ -66,60 +66,60 @@ Send and Receive TextMessage with Property
     ${receivedProperty}=  Get String Property  ownProp
     Should Be Equal As Strings  ${receivedProperty}  ${property}
 
-Message Id
+JMS Message Id
     Create Text Message  ${BODY_TEXT}
-    ${id}=  Get Message Id
+    ${id}=  Get JMS Message Id
     Should Be Equal As Strings  None  ${id}
     Send To Queue  ${QUEUE}
-    ${id}=  Get Message Id
+    ${id}=  Get JMS Message Id
     Should Start With  ${id}  ID:
 
-Set Type
+Set JMS Type
     Create Text Message  ${BODY_TEXT}
-    Set Type  txt
+    Set JMS Type  txt
     Send To Queue  ${QUEUE}
     Receive From Queue  ${QUEUE}
-    ${type}=  Get Type
+    ${type}=  Get JMS Type
     Should Be Equal As Strings  ${type}  txt
 
-Correlation Id
+JMS Correlation Id
     Create Text Message  ${BODY_TEXT}
-    Set Correlation Id  123
+    Set JMS Correlation Id  123
     Send To Queue  ${QUEUE}
     Receive From Queue  ${QUEUE}
-    ${cid}=  Get Correlation Id
+    ${cid}=  Get JMS Correlation Id
     Should Be Equal As Strings  ${cid}  123
 
-Reply To Queue with Queue
+JMS Reply To Queue with Queue
     Create Text Message  ${BODY_TEXT}
-    Set Reply To Queue  Q.TEST.REPLY
+    Set JMS Reply To Queue  Q.TEST.REPLY
     Send To Queue  ${QUEUE}
     Receive From Queue  ${QUEUE}
-    ${r}=  Get Reply To Queue
+    ${r}=  Get JMS Reply To Queue
     Should Be Equal As Strings  ${r}  Q.TEST.REPLY
 
-Reply To Queue with Topic
+JMS Reply To Queue with Topic
     Create Text Message  ${BODY_TEXT}
-    Set Reply To Topic  ${TOPIC}
+    Set JMS Reply To Topic  ${TOPIC}
     Send To Queue  ${QUEUE}
     Receive From Queue  ${QUEUE}
-    ${q}=  Get Reply To Queue
+    ${q}=  Get JMS Reply To Queue
     Should Be Equal As Strings  ${q}  None
 
-Reply To Topic with Topic
+JMS Reply To Topic with Topic
     Create Text Message  ${BODY_TEXT}
-    Set Reply To Topic  ${TOPIC}
+    Set JMS Reply To Topic  ${TOPIC}
     Send To Queue  ${QUEUE}
     Receive From Queue  ${QUEUE}
-    ${t}=  Get Reply To Topic
+    ${t}=  Get JMS Reply To Topic
     Should Be Equal As Strings  ${t}  ${TOPIC}
 
-Reply To Topic with Queue
+JMS Reply To Topic with Queue
     Create Text Message  ${BODY_TEXT}
-    Set Reply To Queue  Q.TEST.REPLY
+    Set JMS Reply To Queue  Q.TEST.REPLY
     Send To Queue  ${QUEUE}
     Receive From Queue  ${QUEUE}
-    ${t}=  Get Reply To Topic
+    ${t}=  Get JMS Reply To Topic
     Should Be Equal As Strings  ${t}  None
 
 Producer TimeToLive and Message Expiration
@@ -127,6 +127,6 @@ Producer TimeToLive and Message Expiration
     Set Producer Time To Live  20000
     Send To Queue  ${QUEUE}
     Receive From Queue  ${QUEUE}
-    ${v}=  Get Expiration
+    ${v}=  Get JMS Expiration
     ${e}=  Evaluate  ${v} > 0
     Should Be True  ${e}

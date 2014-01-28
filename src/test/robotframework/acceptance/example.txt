@@ -1,4 +1,5 @@
 *** Settings ***
+Library         String
 Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Suite Setup     Connect And Start
 Suite Teardown  Close
@@ -21,10 +22,11 @@ Queue Send and Receive TextMessage
     Should Be Equal  ${BODY_TEXT}  ${body}
 
 Topic Send and Receive TextMessage
+    ${text}=  Generate Random String
     Subscribe  ${TOPIC}
-    Create Text Message  ${BODY_TEXT}
+    Create Text Message  ${text}
     Send To Topic  ${TOPIC}
     Receive From Topic
     ${body}=  Get Text
-    Should Be Equal  ${BODY_TEXT}  ${body}
+    Should Be Equal  ${body}  ${text}
     Unsubscribe

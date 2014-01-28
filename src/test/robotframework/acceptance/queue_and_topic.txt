@@ -1,4 +1,5 @@
 *** Settings ***
+Library         String
 Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Documentation   Queue and topic have the same producer. Just to check it will work when both are used in suite.
 Suite Setup		Setup
@@ -10,7 +11,7 @@ Test Tear Down  Clear Queue  ${QUEUE}
 ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
 ${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
 ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
-${TOPIC}                    TOPIC.JMSLIBRARY.TEST
+${TOPIC_D}                  TOPIC.JMSLIBRARY.DURABLE.TEST
 ${CLIENT_ID}                acceptancetest
 ${SUBSCRIPTION_NAME}        acceptance-subscription
 ${BODY_TEXT}                Hello world!
@@ -33,11 +34,12 @@ Send and Receive TextMessage
     Should Be Equal  ${BODY_TEXT}  ${body}
 
 Durable Topic Subscriber
-    Subscribe Durable  ${TOPIC}   ${SUBSCRIPTION_NAME}
+    ${pvalue}=  Generate Random String
+    Subscribe Durable  ${TOPIC_D}   ${SUBSCRIPTION_NAME}
     Create Text Message  ${BODY_TEXT}
-    Set String Property  ${PROPERTY_NAME}  ${PROPERTY_VALUE}  
-    Send To Topic  ${TOPIC}
+    Set String Property  ${PROPERTY_NAME}  ${pvalue}
+    Send To Topic  ${TOPIC_D}
     Receive From Topic
     ${pid}=  Get String Property  ${PROPERTY_NAME}
-    Should be Equal  ${pid}  ${PROPERTY_VALUE}
+    Should be Equal  ${pid}  ${pvalue}
     Unsubscribe Durable  ${SUBSCRIPTION_NAME}

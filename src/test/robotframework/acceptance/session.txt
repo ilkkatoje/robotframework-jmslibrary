@@ -19,7 +19,7 @@ Send Client Acknowledged
     Send To Queue  ${QUEUE}
     Receive From Queue  ${QUEUE}
     Acknowledge
-    ${r}=  Get Redelivered
+    ${r}=  Get JMS Redelivered
 
 Transaction
     Initialize Session  true  0
@@ -33,16 +33,16 @@ Transaction
     ${c}=  Clear Queue  ${QUEUE}
     Should Be Equal As Integers  0  ${c}
 
-Not Redelivered
+Not JMS Redelivered
     Initialize Session  false  CLIENT_ACKNOWLEDGE
     Create Text Message  ${BODY_TEXT}
     Send To Queue  ${QUEUE}
     Receive From Queue  ${QUEUE}
-    ${t}=  Get Redelivered
+    ${t}=  Get JMS Redelivered
     Should Not Be True  ${t}
     Acknowledge
 
-Redelivered              
+JMS Redelivered              
     Initialize Session  false  CLIENT_ACKNOWLEDGE
     Create Text Message  ${BODY_TEXT}
     Send To Queue  ${QUEUE}
@@ -50,5 +50,5 @@ Redelivered
     Initialize Session  false  CLIENT_ACKNOWLEDGE
     Receive From Queue  ${QUEUE}
     Acknowledge
-    ${t}=  Get Redelivered
+    ${t}=  Get JMS Redelivered
     Should Be True  ${t}
