@@ -18,7 +18,7 @@ ${PROPERTY_VALUE}           1234
 
 *** Keywords ***
 Setup
-    Connect  org.apache.activemq.jndi.ActiveMQInitialContextFactory  tcp://localhost:61616?jms.useAsyncSend=false
+    Connect
     Set Client Id  ${CLIENT_ID}
     Initialize Session
     Start
