@@ -65,7 +65,7 @@ public class JMSLibrary {
 	
 	/**
 	 * Settings for selecting JMS provider.
-
+	 * 
 	 * Example:
 	 * | Library | JMSLibrary | org.apache.activemq.jndi.ActiveMQInitialContextFactory | tcp://localhost:61616?jms.useAsyncSend=false |
 	 */
@@ -79,7 +79,7 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Connects to broker. Does not start connection or initialize session.
+	 * Connects to broker. Does not initialize session nor start connection.
 	 * 
 	 */
 	public void connect() throws Exception {
@@ -87,7 +87,7 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Connects to broker. Does not start connection or initialize session.
+	 * Connects to broker. Does not initialize session nor start connection.
 	 * 
 	 */
 	public void connect(String username, String password) throws Exception {
@@ -428,8 +428,8 @@ public class JMSLibrary {
 	 * properties can be accessed via methods.
 	 * 
 	 * Arguments:
-	 * - _queue_
-	 * - _timeout_: timeout in milliseconds
+	 * - _queue_: name of the queue
+	 * - _timeout_: receive timeout in milliseconds
 	 */
 	public void receiveFromQueue(String queue, long timeout) throws Exception {
 		BrokerSession bs = brokerConnection.getBrokerSession();
@@ -500,9 +500,8 @@ public class JMSLibrary {
 	/**
 	 * Subscribe (Subscribe Durable) must have been called before this.
 	 * 
-	 * Arguments:
-	 * - _timeout_: timeout in milliseconds
-	 * 
+	 * Argument:
+	 * - _timeout_: receive timeout milliseconds
 	 */
 	public void receiveFromTopic(long timeout) throws Exception {
 		BrokerSession bs = brokerConnection.getBrokerSession();
