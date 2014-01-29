@@ -27,7 +27,7 @@ import fi.toje.himmeli.jmslibrary.BrokerSession;
  * | *** Settings ***
  * | Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
  * | Suite Setup     Connect And Start
- * | Suite Teardown  Close
+ * | Suite Teardown  Close Connection
  * |
  * | *** Variables ***
  * | ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
