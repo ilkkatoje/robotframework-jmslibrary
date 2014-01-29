@@ -2,7 +2,7 @@
 Library         String
 Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Suite Setup     Connect And Start
-Suite Teardown  Close
+Suite Teardown  Close Connection
 Test Setup      Clear Queue  ${QUEUE}
 Test Tear Down  Clear Queue  ${QUEUE}
 

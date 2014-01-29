@@ -3,7 +3,7 @@ Library         String
 Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Documentation   Queue and topic have the same producer. Just to check it will work when both are used in suite.
 Suite Setup		Setup
-Suite Teardown  Close
+Suite Teardown  Close Connection
 Test Setup      Clear Queue  ${QUEUE}
 Test Tear Down  Clear Queue  ${QUEUE}
 

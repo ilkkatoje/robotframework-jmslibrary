@@ -2,7 +2,7 @@
 Documentation   Test suite which deals with settings related to session scope, hence modifications at some test case can have side effects at another one. Be careful.
 Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Suite Setup		Connect And Start
-Suite Teardown	Close
+Suite Teardown	Close Connection
 Test Setup      Clear Queue  ${QUEUE}
 Test Tear Down  Clear Queue  ${QUEUE}
 

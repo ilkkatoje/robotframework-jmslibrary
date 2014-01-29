@@ -18,7 +18,7 @@ ${CLIENT_ID}                jmslibrary
 
 Connection
 	Connect
-    Close
+    Close Connection
 
 
 
@@ -27,4 +27,4 @@ Client Id
     Set Client Id  ${CLIENT_ID}
 	${id}=  Get Client Id
 	Should Be Equal  ${id}  ${CLIENT_ID}
-    Close
+    Close Connection

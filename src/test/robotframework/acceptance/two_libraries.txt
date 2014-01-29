@@ -40,5 +40,5 @@ Initialize Suite
     jms2.Connect And Start
 
 Deinitialize Suite
-    jms1.Close
-    jms2.Close
+    jms1.Close Connection
+    jms2.Close Connection

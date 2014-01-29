@@ -2,7 +2,7 @@
 Library         String
 Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Suite Setup		Setup
-Suite Teardown  Close
+Suite Teardown  Close Connection
 
 *** Variables ***
 ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
