@@ -41,7 +41,6 @@ public class BrokerSession {
 	private HashMap<String, Queue> queues;
 	private HashMap<String, Topic> topics;
 	private Message message;
-	private long defaultReceiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 	
 	public BrokerSession(Session session) throws JMSException {
 		this.session = session;
@@ -358,7 +357,7 @@ public class BrokerSession {
 	 * @throws Exception if no message available
 	 */
 	public void receiveFromQueue(String queue) throws Exception {
-		receiveFromQueue(queue, defaultReceiveTimeout);
+		receiveFromQueue(queue, DEFAULT_RECEIVE_TIMEOUT);
 	}
 	
 	/**
@@ -445,7 +444,7 @@ public class BrokerSession {
 	 * @throws Exception
 	 */
 	public void receiveFromTopic() throws Exception {
-		receiveFromTopic(defaultReceiveTimeout);
+		receiveFromTopic(DEFAULT_RECEIVE_TIMEOUT);
 	}
 	
 	/**
@@ -519,7 +518,7 @@ public class BrokerSession {
 		Message lastMessage = null;
 		MessageConsumer queueConsumer = session.createConsumer(getQueue(queue));
 		do {
-			lastMessage = queueConsumer.receive(defaultReceiveTimeout);
+			lastMessage = queueConsumer.receive(DEFAULT_RECEIVE_TIMEOUT);
 			if (lastMessage != null) {
 				count++;
 				if (session.getTransacted()) {
@@ -549,7 +548,7 @@ public class BrokerSession {
 		int count = 0;
 		Message lastMessage = null;
 		do {
-			lastMessage = topicConsumer.receive(defaultReceiveTimeout);
+			lastMessage = topicConsumer.receive(DEFAULT_RECEIVE_TIMEOUT);
 			if (lastMessage != null) {
 				count++;
 				if (session.getTransacted()) {
