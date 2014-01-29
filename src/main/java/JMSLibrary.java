@@ -17,7 +17,7 @@ import fi.toje.himmeli.jmslibrary.BrokerSession;
  * Set the library and chosen JMS provider into classpath and start testing.
  * 
  * Library uses one connection which has one session.
- * Session includes one message producer and one message consumer for topic. Queue consumers are created on the fly per receive. Currently, messages can be received from only one topic at time.
+ * Session includes one message producer and one message consumer for topic. Queue consumers are created on the fly when receiving. Currently, messages can be received from only one topic at time.
  * Producer specific settings (timeToLive etc.) apply within a session. Settings will be reset, if session is reinitialized.
  * 
  * Default receive timeout is 100 ms.
