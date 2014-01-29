@@ -82,7 +82,7 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Connects to broker. Does not initialize session nor start connection.
+	 * Connects to broker. Does not initialize session or start connection.
 	 * 
 	 */
 	public void connect() throws Exception {
@@ -90,7 +90,7 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Connects to broker. Does not initialize session nor start connection.
+	 * Connects to broker. Does not initialize session or start connection.
 	 * 
 	 */
 	public void connect(String username, String password) throws Exception {
@@ -172,10 +172,18 @@ public class JMSLibrary {
 	}
 	
 	/**
+	 * Stops connection.
+	 * 
+	 */
+	public void stop() throws JMSException {
+		brokerConnection.stop();
+	}
+	
+	/**
 	 * Closes broker connection. Closes all resources (session, producer and consumer).
 	 * 
 	 */
-	public void close() throws Exception {
+	public void closeConnection() throws Exception {
 		brokerConnection.close();
 		brokerConnection = null;
 	}
