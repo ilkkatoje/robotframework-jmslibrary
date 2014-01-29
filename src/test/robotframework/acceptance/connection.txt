@@ -1,8 +1,5 @@
 *** Settings ***
-
 Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
-
-
 
 *** Variables ***
 
@@ -12,19 +9,21 @@ ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
 ${BODY_TEXT}                Hello world!
 ${CLIENT_ID}                jmslibrary
 
-
-
 *** Test Cases ***
-
 Connection
 	Connect
     Close Connection
-
-
 
 Client Id
     Connect
     Set Client Id  ${CLIENT_ID}
 	${id}=  Get Client Id
 	Should Be Equal  ${id}  ${CLIENT_ID}
+    Close Connection
+
+Sequential Connection
+    Connect And Start
+    Run Keyword And Expect Error  *  Connect And Start
+    Close Connection
+    Connect
     Close Connection
