@@ -8,7 +8,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 
 import javax.jms.BytesMessage;
-import javax.jms.Connection;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -34,7 +33,6 @@ public class BrokerSession {
 	private static final int DEFAULT_BUFFER = 8192;
 	private static final long DEFAULT_RECEIVE_TIMEOUT = 100;
 	
-	private Connection connection;
 	private Session session;
 	private MessageProducer producer;
 	private long timeToLive = 0;
@@ -45,9 +43,8 @@ public class BrokerSession {
 	private Message message;
 	private long defaultReceiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 	
-	public BrokerSession(Connection connection, boolean transacted, int type) throws JMSException {
-		this.connection = connection;
-		session = this.connection.createSession(transacted, type);
+	public BrokerSession(Session session) throws JMSException {
+		this.session = session;
 		queues = new HashMap<String, Queue>();
 		topics = new HashMap<String, Topic>();
 	}

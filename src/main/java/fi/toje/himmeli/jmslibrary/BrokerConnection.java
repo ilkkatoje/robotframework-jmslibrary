@@ -8,7 +8,6 @@ public class BrokerConnection {
 	
 	private Connection connection;
 	private BrokerSession brokerSession;
-	private boolean isStarted = false;
 	
 	public BrokerConnection(Connection connection) throws Exception {
 		this.connection = connection;
@@ -29,10 +28,7 @@ public class BrokerConnection {
 	 * @throws JMSException
 	 */
 	public void start() throws JMSException {
-		if (!isStarted) {
-			connection.start();
-			isStarted = true;
-		}
+		connection.start();
 	}
 	
 	/**
@@ -42,10 +38,7 @@ public class BrokerConnection {
 	 * @throws JMSException
 	 */
 	public void stop() throws JMSException {
-		if (isStarted) {
-			connection.stop();
-			isStarted = false;
-		}
+		connection.stop();
 	}
 	
 	/**
@@ -62,13 +55,8 @@ public class BrokerConnection {
 	}
 	
 	public void closeSession() throws JMSException {
-		boolean wasStarted = isStarted;
-		stop();
 		if (brokerSession != null) {
 			brokerSession.close();
-		}
-		if (wasStarted) {
-			start();
 		}
 	}
 	
@@ -89,32 +77,16 @@ public class BrokerConnection {
 	
 	/**
 	 * Initializes new session for connection. Closes existing producer, consumer and session if needed.
-	 *  
-	 * @param transacted
-	 * @param type
-	 * @throws JMSException 
-	 */
-	private void initSession(boolean transacted, int type) throws Exception {
-		boolean wasStarted = isStarted;
-		stop();
-		if (brokerSession != null) {
-			brokerSession.close();
-		}
-		brokerSession = new BrokerSession(connection, transacted, type);
-		if (wasStarted) {
-			start();
-		}
-	}
-	
-	/**
-	 * Initializes new session for connection. Closes existing producer, consumer and session if needed.
 	 * 
 	 * @param transacted
 	 * @param type AUTO_ACKNOWLEDGE, CLIENT_ACKNOWLEDGE, DUPS_OK_ACKNOWLEDGE, SESSION_TRANSACTED
 	 * @throws JMSException
 	 */
 	public void initSession(boolean transacted, String type) throws Exception {
-		initSession(transacted, convertType(type));
+		if (brokerSession != null) {
+			brokerSession.close();
+		}
+		brokerSession = new BrokerSession(connection.createSession(transacted, convertType(type)));
 	}
 	
 	/**
