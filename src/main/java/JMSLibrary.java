@@ -73,13 +73,14 @@ public class JMSLibrary {
 	private BrokerConnection brokerConnection;
 	
 	/**
-	 * Settings for selecting JMS provider. Default JNDI connection factory look up string: ConnectionFactory
+	 * Settings for selecting JMS provider. Default JNDI connection factory look up string is _ConnectionFactory_.
 	 * 
 	 * Optional settings:
 	 * - _connection_factory_name_:  lookup name for connection factory
 	 * 
-	 * Example:
+	 * Examples:
 	 * | Library | JMSLibrary | org.apache.activemq.jndi.ActiveMQInitialContextFactory | tcp://localhost:61616?jms.useAsyncSend=false |
+	 * | Library | JMSLibrary | com.sun.jndi.fscontext.RefFSContextFactory | file:/C:/JNDI-Directory | connection_factory_name=myCF |
 	 */
 	public JMSLibrary(String initialContextFactory, String providerUrl, Map<String, String> settings) throws NamingException {
 		Properties env = new Properties( );
@@ -530,7 +531,7 @@ public class JMSLibrary {
 	 * Subscribe (Subscribe Durable) must have been called before this.
 	 * 
 	 * Argument:
-	 * - _timeout_: receive timeout milliseconds
+	 * - _timeout_: receive timeout in milliseconds
 	 */
 	public void receiveFromTopic(long timeout) throws Exception {
 		BrokerSession bs = brokerConnection.getBrokerSession();
