@@ -1,6 +1,6 @@
 *** Settings ***
-Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Library			OperatingSystem
+Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Suite Setup		Connect And Start
 Suite Teardown  Close Connection
 Test Setup      Clear Queue  ${QUEUE}
@@ -10,6 +10,7 @@ Test Tear Down  Clear Queue  ${QUEUE}
 ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
 ${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
 ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
+${REPLY2QUEUE}              QUEUE.JMSLIBRARY.TEST.REPLY
 ${TOPIC}                    TOPIC.JMSLIBRARY.TEST
 ${SUBSCRIBER}               acceptancetest
 ${BODY_TEXT}                Hello world!
@@ -92,11 +93,11 @@ JMS Correlation Id
 
 JMS Reply To Queue with Queue
     Create Text Message  ${BODY_TEXT}
-    Set JMS Reply To Queue  Q.TEST.REPLY
+    Set JMS Reply To Queue  ${REPLY2QUEUE}
     Send To Queue  ${QUEUE}
     Receive From Queue  ${QUEUE}
     ${r}=  Get JMS Reply To Queue
-    Should Be Equal As Strings  ${r}  Q.TEST.REPLY
+    Should Be Equal As Strings  ${r}  ${REPLY2QUEUE}
 
 JMS Reply To Queue with Topic
     Create Text Message  ${BODY_TEXT}
@@ -116,7 +117,7 @@ JMS Reply To Topic with Topic
 
 JMS Reply To Topic with Queue
     Create Text Message  ${BODY_TEXT}
-    Set JMS Reply To Queue  Q.TEST.REPLY
+    Set JMS Reply To Queue  ${REPLY2QUEUE}
     Send To Queue  ${QUEUE}
     Receive From Queue  ${QUEUE}
     ${t}=  Get JMS Reply To Topic

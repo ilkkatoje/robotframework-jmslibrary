@@ -6,7 +6,6 @@ Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
 ${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
 ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
-${BODY_TEXT}                Hello world!
 ${CLIENT_ID}                jmslibrary
 
 *** Test Cases ***

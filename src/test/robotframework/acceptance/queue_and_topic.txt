@@ -11,7 +11,7 @@ Test Tear Down  Clear Queue  ${QUEUE}
 ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
 ${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
 ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
-${TOPIC_D}                  TOPIC.JMSLIBRARY.DURABLE.TEST
+${TOPIC_DURABLE}            TOPIC.JMSLIBRARY.DURABLE.TEST
 ${CLIENT_ID}                acceptancetest
 ${SUBSCRIPTION_NAME}        acceptance-subscription
 ${BODY_TEXT}                Hello world!
@@ -35,10 +35,10 @@ Send and Receive TextMessage
 
 Durable Topic Subscriber
     ${pvalue}=  Generate Random String
-    Subscribe Durable  ${TOPIC_D}   ${SUBSCRIPTION_NAME}
+    Subscribe Durable  ${TOPIC_DURABLE}   ${SUBSCRIPTION_NAME}
     Create Text Message  ${BODY_TEXT}
     Set String Property  ${PROPERTY_NAME}  ${pvalue}
-    Send To Topic  ${TOPIC_D}
+    Send To Topic  ${TOPIC_DURABLE}
     Receive From Topic
     ${pid}=  Get String Property  ${PROPERTY_NAME}
     Should be Equal  ${pid}  ${pvalue}

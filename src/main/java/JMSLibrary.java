@@ -28,32 +28,36 @@ import fi.toje.himmeli.jmslibrary.BrokerSession;
  * = Example with ActiveMQ =
  * 
  * | *** Settings ***
+ * | Library         String
  * | Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
  * | Suite Setup     Connect And Start
  * | Suite Teardown  Close Connection
+ * | Test Setup      Clear Queue  ${QUEUE}
+ * | Test Tear Down  Clear Queue  ${QUEUE}
  * |
  * | *** Variables ***
  * | ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
  * | ${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
  * | ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
  * | ${TOPIC}                    TOPIC.JMSLIBRARY.TEST
- * | ${BODY_TEXT}                Hello world!
  * |
  * | *** Test Cases ***
  * | Queue Send and Receive TextMessage
- * |     Create Text Message  ${BODY_TEXT}
+ * |     ${text}=  Generate Random String
+ * |     Create Text Message  ${text}
  * |     Send To Queue  ${QUEUE}
  * |     Receive From Queue  ${QUEUE}
  * |     ${body}=  Get Text
- * |     Should Be Equal  ${BODY_TEXT}  ${body}
+ * |     Should Be Equal  ${body}  ${text}
  * |
  * | Topic Send and Receive TextMessage
  * |     Subscribe  ${TOPIC}
- * |     Create Text Message  ${BODY_TEXT}
+ * |     ${text}=  Generate Random String
+ * |     Create Text Message  ${text}
  * |     Send To Topic  ${TOPIC}
  * |     Receive From Topic
  * |     ${body}=  Get Text
- * |     Should Be Equal  ${BODY_TEXT}  ${body}
+ * |     Should Be Equal  ${body}  ${text}
  * |     Unsubscribe
  * 
  */

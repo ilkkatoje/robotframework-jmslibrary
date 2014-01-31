@@ -1,6 +1,6 @@
 *** Settings ***
-Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Library			OperatingSystem
+Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Suite Setup		Connect And Start
 Suite Teardown  Close Connection
 Test Setup      Clear Queue  ${QUEUE}
