@@ -168,7 +168,7 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * (Re)initializes session for current connection.
+	 * (Re)initializes session.
 	 * 
 	 * Arguments:
 	 * - _transacted_: true or false
