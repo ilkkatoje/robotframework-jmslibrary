@@ -351,7 +351,8 @@ public class BrokerSession {
 	}
 	
 	/**
-	 * Receives message from queue. Uses existing queueConsumer if available and having the same destination.
+	 * Receives message from queue. Uses existing queueConsumer if available and
+	 * having the same destination.
 	 * 
 	 * @param queue
 	 * @throws Exception if no message available
@@ -361,7 +362,8 @@ public class BrokerSession {
 	}
 	
 	/**
-	 * Receives message from queue. Uses existing queueConsumer if available and having the same destination.
+	 * Receives message from queue. Uses existing queueConsumer if available and
+	 * having the same destination.
 	 * 
 	 * @param queue
 	 * @param timeout
@@ -406,7 +408,8 @@ public class BrokerSession {
 	}
 	
 	/**
-	 * Unsubscribes topic. Just closes the consumer. Can be used also with durable subscription.
+	 * Unsubscribes topic. Just closes the consumer. Can be used also with
+	 * durable subscription.
 	 * 
 	 * @throws JMSException
 	 */
@@ -508,7 +511,8 @@ public class BrokerSession {
 	}
 	
 	/**
-	 * Clears the queue by reading all available messages. Also acknowledges or commits depending on the configuration.
+	 * Clears the queue by reading all available messages. Also acknowledges or
+	 * commits depending on the configuration.
 	 * 
 	 * @param destination to be cleared
 	 * @return message count that was consumed from the queue
@@ -540,7 +544,8 @@ public class BrokerSession {
 	}
 	
 	/**
-	 * Clears topic. Topic can be non-durable or durable. Subscribe (Durable) must have been called before.
+	 * Clears topic. Topic can be non-durable or durable. Subscribe (Durable)
+	 * must have been called before.
 	 * 
 	 * @return
 	 * @throws JMSException

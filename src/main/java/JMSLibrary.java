@@ -72,7 +72,8 @@ public class JMSLibrary {
 	private BrokerConnection brokerConnection;
 	
 	/**
-	 * Settings for selecting JMS provider. Default JNDI connection factory look up string is _ConnectionFactory_.
+	 * Settings for selecting JMS provider. Default JNDI connection factory
+	 * look up string is _ConnectionFactory_.
 	 * 
 	 * Optional settings:
 	 * - _connection_factory_name_:  lookup name for connection factory
@@ -125,7 +126,8 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Connects to broker. Initializes default session and starts the connection.
+	 * Connects to broker. Initializes default session and starts the
+	 * connection.
 	 */
 	public void connectAndStart() throws Exception {
 		connect();
@@ -134,7 +136,8 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Connects to broker. Initializes default session and starts the connection.
+	 * Connects to broker. Initializes default session and starts the
+	 * connection.
 	 */
 	public void connectAndStart(String username, String password) throws Exception {
 		connect(username, password);
@@ -157,7 +160,8 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * (Re)initializes session with default attributes (non-transacted, AUTO_ACKNOWLEDGE).
+	 * (Re)initializes session with default attributes (non-transacted,
+	 * AUTO_ACKNOWLEDGE).
 	 */
 	public void initializeSession() throws Exception {
 		initializeSession(false, BrokerSession.AUTO_ACKNOWLEDGE);
@@ -189,7 +193,8 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Closes broker connection. Closes all resources (session, producer and consumer).
+	 * Closes broker connection. Closes all resources (session, producer and
+	 * consumer).
 	 */
 	public void closeConnection() throws Exception {
 		brokerConnection.close();
@@ -213,7 +218,8 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Acknowledges all consumed messages of the session. Used in CLIENT_ACKNOWLEDGE mode.
+	 * Acknowledges all consumed messages of the session. Used in
+	 * CLIENT_ACKNOWLEDGE mode.
 	 */
 	public void acknowledge() throws JMSException {
 		BrokerSession bs = brokerConnection.getBrokerSession();
@@ -229,7 +235,8 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Creates BytesMessage from file. Additional properties can be set after creation.
+	 * Creates BytesMessage from file. Additional properties can be set after
+	 * creation.
 	 * 
 	 * Argument:
 	 * - _file_: name of the file
@@ -282,7 +289,8 @@ public class JMSLibrary {
 	/**
 	 * JMSReplyTo queue of message.
 	 * 
-	 * Returns queue if it was set and was type of queue, otherwise (not set or is topic) null 
+	 * Returns queue if it was set and was type of queue, otherwise (not set or
+	 * is topic) null 
 	 */
 	public String getJMSReplyToQueue() throws JMSException {
 		BrokerSession bs = brokerConnection.getBrokerSession();
@@ -300,7 +308,8 @@ public class JMSLibrary {
 	/**
 	 * JMSReplyTo value of message.
 	 * 
-	 * Returns topic if it was set and was type of topic, otherwise (not set or is queue) null 
+	 * Returns topic if it was set and was type of topic, otherwise (not set or
+	 * is queue) null 
 	 */
 	public String getJMSReplyToTopic() throws JMSException {
 		BrokerSession bs = brokerConnection.getBrokerSession();
@@ -402,8 +411,9 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Sends message to queue. The message must have been created beforehand using one of the create message methods.
-	 * Message id can be accessed after sending.
+	 * Sends message to queue. The message must have been created beforehand
+	 * using one of the create message methods. Message id can be accessed after
+	 * sending.
 	 */
 	public void sendToQueue(String queue) throws Exception {
 		BrokerSession bs = brokerConnection.getBrokerSession();
@@ -411,8 +421,8 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Receives message from queue. The message is set to internal message object and its body and
-	 * properties can be accessed via methods.
+	 * Receives message from queue. The message is set to internal message
+	 * object and its body and properties can be accessed via methods.
 	 */
 	public void receiveFromQueue(String queue) throws Exception {
 		BrokerSession bs = brokerConnection.getBrokerSession();
@@ -420,8 +430,8 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Receives message from queue. The message is set to internal message object and its body and
-	 * properties can be accessed via methods.
+	 * Receives message from queue. The message is set to internal message
+	 * object and its body and properties can be accessed via methods.
 	 * 
 	 * Arguments:
 	 * - _queue_: name of the queue
@@ -433,8 +443,9 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Sends message to topic. The message must have been created beforehand using one of the create message methods.
-	 * Message id can be accessed after sending.
+	 * Sends message to topic. The message must have been created beforehand
+	 * using one of the create message methods. Message id can be accessed after
+	 * sending.
 	 */
 	public void sendToTopic(String topic) throws Exception {
 		BrokerSession bs = brokerConnection.getBrokerSession();
@@ -450,7 +461,8 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Unsubscribes from topic and closes topic consumer. This can be used also after Subscribe Durable (Durable subscription will still remain).
+	 * Unsubscribes from topic and closes topic consumer. This can be used also
+	 * after Subscribe Durable (Durable subscription will still remain).
 	 */
 	public void unsubscribe() throws JMSException {
 		BrokerSession bs = brokerConnection.getBrokerSession();
@@ -528,7 +540,8 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Clears the queue by reading all available messages. Acknowledges or commits depending on the configuration.
+	 * Clears the queue by reading all available messages. Acknowledges or
+	 * commits depending on the configuration.
 	 * 
 	 * Returns message count that was consumed from the queue
 	 */
@@ -541,8 +554,9 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Clears the topic by reading all available messages. Acknowledges or commits depending on the configuration.
-	 * Subscription must have been done before.
+	 * Clears the topic by reading all available messages. Acknowledges or
+	 * commits depending on the configuration. Subscription must have been done
+	 * before.
 	 * 
 	 * Returns message count that was consumed from the topic.
 	 */

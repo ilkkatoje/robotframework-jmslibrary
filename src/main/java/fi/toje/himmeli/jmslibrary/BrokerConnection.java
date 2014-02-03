@@ -22,8 +22,7 @@ public class BrokerConnection {
 	}
 	
 	/**
-	 * Starts the connection. Also sets internal variable which is used 
-	 * when initializing sessions (start or not to start connection).
+	 * Starts the connection.
 	 * 
 	 * @throws JMSException
 	 */
@@ -32,8 +31,7 @@ public class BrokerConnection {
 	}
 	
 	/**
-	 * Stops the connection. Also sets internal variable which is used 
-	 * when initializing sessions (start or not to start connection).
+	 * Stops the connection.
 	 * 
 	 * @throws JMSException
 	 */
@@ -76,10 +74,12 @@ public class BrokerConnection {
 	}
 	
 	/**
-	 * Initializes new session for connection. Closes existing producer, consumer and session if needed.
+	 * Initializes new session for connection. Closes existing producer,
+	 * consumer and session if needed.
 	 * 
 	 * @param transacted
-	 * @param type AUTO_ACKNOWLEDGE, CLIENT_ACKNOWLEDGE, DUPS_OK_ACKNOWLEDGE, SESSION_TRANSACTED
+	 * @param type AUTO_ACKNOWLEDGE, CLIENT_ACKNOWLEDGE, DUPS_OK_ACKNOWLEDGE,
+	 * SESSION_TRANSACTED
 	 * @throws JMSException
 	 */
 	public void initSession(boolean transacted, String type) throws Exception {
