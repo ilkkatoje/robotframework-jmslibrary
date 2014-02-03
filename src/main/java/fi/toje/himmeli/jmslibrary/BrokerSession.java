@@ -502,6 +502,7 @@ public class BrokerSession {
 			e.nextElement();
 			depth++;
 		}
+		browser.close();
 		
 		return depth;
 	}
