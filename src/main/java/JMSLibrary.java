@@ -213,7 +213,7 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Acknowledges all consumed messages of the session. Used in CLIENT_ACKNOWLDGE mode.
+	 * Acknowledges all consumed messages of the session. Used in CLIENT_ACKNOWLEDGE mode.
 	 */
 	public void acknowledge() throws JMSException {
 		BrokerSession bs = brokerConnection.getBrokerSession();
