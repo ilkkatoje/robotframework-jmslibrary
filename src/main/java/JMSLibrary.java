@@ -206,16 +206,16 @@ public class JMSLibrary {
 	 * Commits all messages in the session.
 	 */
 	public void commit() throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.commit();
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.commit();
 	}
 	
 	/**
 	 * Rolls back messages in the session.
 	 */
 	public void rollback() throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.rollback();
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.rollback();
 	}
 	
 	/**
@@ -223,16 +223,16 @@ public class JMSLibrary {
 	 * CLIENT_ACKNOWLEDGE mode.
 	 */
 	public void acknowledge() throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.acknowledge();
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.acknowledge();
 	}
 	
 	/**
 	 * Creates TextMessage. Additional properties can be set after creation.
 	 */
 	public void createTextMessage(String text) throws Exception {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.createTextMessage(text);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.createTextMessage(text);
 	}
 	
 	/**
@@ -243,48 +243,48 @@ public class JMSLibrary {
 	 * - _file_: name of the file
 	 */
 	public void createBytesMessageFromFile(String file) throws JMSException, IOException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.createBytesMessage(file);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.createBytesMessage(file);
 	}
 	
 	/**
 	 * Sets JMSType of message.
 	 */
 	public void setJMSType(String type) throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.setType(type);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.setType(type);
 	}
 	
 	/**
 	 * Returns JMSType of message.
 	 */
 	public String getJMSType() throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		return bs.getType();
+		ProviderSession ps = providerConnection.getProviderSession();
+		return ps.getType();
 	}
 	
 	/**
 	 * Sets JMSCorrelationID for message.
 	 */
 	public void setJMSCorrelationId(String correlationId) throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.setCorrelationId(correlationId);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.setCorrelationId(correlationId);
 	}
 	
 	/**
 	 * Returns JMSCorrelationID of message.
 	 */
 	public String getJMSCorrelationId() throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		return bs.getCorrelationId();
+		ProviderSession ps = providerConnection.getProviderSession();
+		return ps.getCorrelationId();
 	}
 	
 	/**
 	 * Sets JMSReplyTo queue for message.
 	 */
 	public void setJMSReplyToQueue(String queue) throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.setReplyToQueue(queue);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.setReplyToQueue(queue);
 	}
 	
 	/**
@@ -294,16 +294,16 @@ public class JMSLibrary {
 	 * is topic) null 
 	 */
 	public String getJMSReplyToQueue() throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		return bs.getReplyToQueue();
+		ProviderSession ps = providerConnection.getProviderSession();
+		return ps.getReplyToQueue();
 	}
 	
 	/**
 	 * Sets JMSReplyTo topic for message.
 	 */
 	public void setJMSReplyToTopic(String topic) throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.setReplyToTopic(topic);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.setReplyToTopic(topic);
 	}
 	
 	/**
@@ -313,8 +313,8 @@ public class JMSLibrary {
 	 * is queue) null 
 	 */
 	public String getJMSReplyToTopic() throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		return bs.getReplyToTopic();
+		ProviderSession ps = providerConnection.getProviderSession();
+		return ps.getReplyToTopic();
 	}
 	
 	/**
@@ -324,8 +324,8 @@ public class JMSLibrary {
 	 * - _timeToLive_: time to live in milliseconds
 	 */
 	public void setProducerTimeToLive(long timeToLive) throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.setProducerTimeToLive(timeToLive);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.setProducerTimeToLive(timeToLive);
 	}
 	
 	/**
@@ -334,8 +334,8 @@ public class JMSLibrary {
 	 * Returns expiration of message
 	 */
 	public long getJMSExpiration() throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		return bs.getExpiration();
+		ProviderSession ps = providerConnection.getProviderSession();
+		return ps.getExpiration();
 	}
 	
 	/**
@@ -345,24 +345,24 @@ public class JMSLibrary {
 	 * - _deliveryMode_: PERSISTENT or NON_PERSISTENT
 	 */
 	public void setProducerDeliveryMode(String deliveryMode) throws Exception {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.setProducerDeliveryMode(deliveryMode);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.setProducerDeliveryMode(deliveryMode);
 	}
 	
 	/**
 	 * Returns delivery mode of the producer: PERSISTENT or NON_PERSISTENT.
 	 */
 	public String getProducerDeliveryMode() throws Exception {
-		ProviderSession bs = providerConnection.getProviderSession();
-		return bs.getProducerDeliveryMode();
+		ProviderSession ps = providerConnection.getProviderSession();
+		return ps.getProducerDeliveryMode();
 	}
 	
 	/**
 	 * Returns delivery mode of received message: PERSISTENT or NON_PERSISTENT.
 	 */
 	public String getDeliveryMode() throws Exception {
-		ProviderSession bs = providerConnection.getProviderSession();
-		return bs.getDeliveryMode();
+		ProviderSession ps = providerConnection.getProviderSession();
+		return ps.getDeliveryMode();
 	}
 	
 	/**
@@ -371,16 +371,16 @@ public class JMSLibrary {
 	 * Return true if message was redelivered
 	 */
 	public boolean getJMSRedelivered() throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		return bs.getJmsRedelivered();
+		ProviderSession ps = providerConnection.getProviderSession();
+		return ps.getJmsRedelivered();
 	}
 	
 	/**
 	 * Sets string property for message.
 	 */
 	public void setStringProperty(String name, String value) throws Exception {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.setStringProperty(name, value);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.setStringProperty(name, value);
 		System.out.println(name + "=" + value);
 	}
 	
@@ -391,8 +391,8 @@ public class JMSLibrary {
 	 * - _name_: name of the property
 	 */
 	public String getStringProperty(String name) throws Exception {
-		ProviderSession bs = providerConnection.getProviderSession();
-		String value = bs.getStringProperty(name);
+		ProviderSession ps = providerConnection.getProviderSession();
+		String value = ps.getStringProperty(name);
 		System.out.println(name + "=" + value);
 		
 		return value;
@@ -404,8 +404,8 @@ public class JMSLibrary {
 	 * Returns message id.
 	 */
 	public String getJMSMessageId() throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		String id = bs.getMessageId();
+		ProviderSession ps = providerConnection.getProviderSession();
+		String id = ps.getMessageId();
 		System.out.println("MessageId=" + id);
 		
 		return id;
@@ -417,8 +417,8 @@ public class JMSLibrary {
 	 * sending.
 	 */
 	public void sendToQueue(String queue) throws Exception {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.sendToQueue(queue);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.sendToQueue(queue);
 	}
 	
 	/**
@@ -426,8 +426,8 @@ public class JMSLibrary {
 	 * object and its body and properties can be accessed via methods.
 	 */
 	public void receiveFromQueue(String queue) throws Exception {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.receiveFromQueue(queue);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.receiveFromQueue(queue);
 	}
 	
 	/**
@@ -439,8 +439,8 @@ public class JMSLibrary {
 	 * - _timeout_: receive timeout in milliseconds
 	 */
 	public void receiveFromQueue(String queue, long timeout) throws Exception {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.receiveFromQueue(queue, timeout);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.receiveFromQueue(queue, timeout);
 	}
 	
 	/**
@@ -449,16 +449,16 @@ public class JMSLibrary {
 	 * sending.
 	 */
 	public void sendToTopic(String topic) throws Exception {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.sendToTopic(topic);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.sendToTopic(topic);
 	}
 	
 	/**
 	 * Subscribes to topic. Receive From Topic can be called after.
 	 */
 	public void subscribe(String topic) throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.subscribe(topic);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.subscribe(topic);
 	}
 	
 	/**
@@ -466,8 +466,8 @@ public class JMSLibrary {
 	 * after Subscribe Durable (Durable subscription will still remain).
 	 */
 	public void unsubscribe() throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.unsubscribe();
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.unsubscribe();
 	}
 	
 	/**
@@ -478,8 +478,8 @@ public class JMSLibrary {
 	 * - _name_: subscription name
 	 */
 	public void subscribeDurable(String topic, String name) throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.subscribeDurable(topic, name);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.subscribeDurable(topic, name);
 	}
 	
 	/**
@@ -489,16 +489,16 @@ public class JMSLibrary {
 	 * - _name_: subscription name
 	 */
 	public void unsubscribeDurable(String name) throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.unsubscribeDurable(name);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.unsubscribeDurable(name);
 	}
 	
 	/**
 	 * Subscribe (Subscribe Durable) must have been called before this.
 	 */
 	public void receiveFromTopic() throws Exception {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.receiveFromTopic();
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.receiveFromTopic();
 	}
 	
 	/**
@@ -508,33 +508,33 @@ public class JMSLibrary {
 	 * - _timeout_: receive timeout in milliseconds
 	 */
 	public void receiveFromTopic(long timeout) throws Exception {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.receiveFromTopic(timeout);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.receiveFromTopic(timeout);
 	}
 	
 	/**
 	 * Returns the body of TextMessage.
 	 */
 	public String getText() throws Exception {
-		ProviderSession bs = providerConnection.getProviderSession();
+		ProviderSession ps = providerConnection.getProviderSession();
 		
-		return bs.getText();
+		return ps.getText();
 	}
 	
 	/**
 	 * Writes body of BytesMessage into file.
 	 */
 	public void writeBytesToFile(String file) throws JMSException, IOException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		bs.writeBytes(file);
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.writeBytes(file);
 	}
 	
 	/**
 	 * Returns queue depth. Implemented using QueueBrowser.
 	 */
 	public int queueDepth(String queue) throws Exception {
-		ProviderSession bs = providerConnection.getProviderSession();
-		int depth = bs.queueDepth(queue);
+		ProviderSession ps = providerConnection.getProviderSession();
+		int depth = ps.queueDepth(queue);
 		System.out.println(queue + " depth is " + depth);
 		
 		return depth;
@@ -547,8 +547,8 @@ public class JMSLibrary {
 	 * Returns message count that was consumed from the queue
 	 */
 	public int clearQueue(String queue) throws Exception {
-		ProviderSession bs = providerConnection.getProviderSession();
-		int count = bs.clearQueue(queue);
+		ProviderSession ps = providerConnection.getProviderSession();
+		int count = ps.clearQueue(queue);
 		System.out.println(queue + " cleared. " + count + " messages consumed.");
 		
 		return count;
@@ -562,8 +562,8 @@ public class JMSLibrary {
 	 * Returns message count that was consumed from the topic.
 	 */
 	public int clearTopic() throws JMSException {
-		ProviderSession bs = providerConnection.getProviderSession();
-		int count = bs.clearTopic();
+		ProviderSession ps = providerConnection.getProviderSession();
+		int count = ps.clearTopic();
 		System.out.println("Topic cleared. " + count + " messages consumed.");
 		
 		return count;
