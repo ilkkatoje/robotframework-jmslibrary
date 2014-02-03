@@ -20,7 +20,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 
-public class BrokerSession {
+public class ProviderSession {
 
 	public static final String AUTO_ACKNOWLEDGE = "AUTO_ACKNOWLEDGE";
 	public static final String CLIENT_ACKNOWLEDGE = "CLIENT_ACKNOWLEDGE";
@@ -42,7 +42,7 @@ public class BrokerSession {
 	private HashMap<String, Topic> topics;
 	private Message message;
 	
-	public BrokerSession(Session session) throws JMSException {
+	public ProviderSession(Session session) throws JMSException {
 		this.session = session;
 		queues = new HashMap<String, Queue>();
 		topics = new HashMap<String, Topic>();

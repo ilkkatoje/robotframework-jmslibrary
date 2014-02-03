@@ -6,94 +6,94 @@ import javax.jms.Session;
 import org.junit.Assert;
 import org.junit.Test;
 
-import fi.toje.himmeli.jmslibrary.BrokerSession;
+import fi.toje.himmeli.jmslibrary.ProviderSession;
 
-public class BrokerSessionTest {
+public class ProviderSessionTest {
 
 	@Test
 	public void convertDeliveryModePersistent() throws Exception {
-		int dm = BrokerSession.convertDeliveryMode("PERSISTENT");
+		int dm = ProviderSession.convertDeliveryMode("PERSISTENT");
 		Assert.assertEquals(dm, DeliveryMode.PERSISTENT);
 	}
 	
 	@Test
 	public void convertDeliveryModeNonPersistent() throws Exception {
-		int dm = BrokerSession.convertDeliveryMode("NON_PERSISTENT");
+		int dm = ProviderSession.convertDeliveryMode("NON_PERSISTENT");
 		Assert.assertEquals(dm, DeliveryMode.NON_PERSISTENT);
 	}
 	
 	@Test(expected=Exception.class)
 	public void convertDeliveryModeWrong() throws Exception {
-		BrokerSession.convertDeliveryMode("WRONG");
+		ProviderSession.convertDeliveryMode("WRONG");
 	}
 	
 	@Test
 	public void convertDeliveryModePersistentInt() throws Exception {
-		String dm = BrokerSession.convertDeliveryMode(DeliveryMode.PERSISTENT);
+		String dm = ProviderSession.convertDeliveryMode(DeliveryMode.PERSISTENT);
 		Assert.assertEquals(dm, "PERSISTENT");
 	}
 	
 	@Test
 	public void convertDeliveryModeNonPersistentInt() throws Exception {
-		String dm = BrokerSession.convertDeliveryMode(DeliveryMode.NON_PERSISTENT);
+		String dm = ProviderSession.convertDeliveryMode(DeliveryMode.NON_PERSISTENT);
 		Assert.assertEquals(dm, "NON_PERSISTENT");
 	}
 	
 	@Test(expected=Exception.class)
 	public void convertDeliveryModeWrongInt() throws Exception {
-		BrokerSession.convertDeliveryMode(123);
+		ProviderSession.convertDeliveryMode(123);
 	}
 	
 	@Test
 	public void convertType0() throws Exception {
-		int t = BrokerSession.convertType("0");
+		int t = ProviderSession.convertType("0");
 		Assert.assertEquals(t, Session.SESSION_TRANSACTED);
 	}
 	
 	@Test
 	public void convertType1() throws Exception {
-		int t = BrokerSession.convertType("1");
+		int t = ProviderSession.convertType("1");
 		Assert.assertEquals(t, Session.AUTO_ACKNOWLEDGE);
 	}
 	
 	@Test
 	public void convertType2() throws Exception {
-		int t = BrokerSession.convertType("2");
+		int t = ProviderSession.convertType("2");
 		Assert.assertEquals(t, Session.CLIENT_ACKNOWLEDGE);
 	}
 	
 	@Test
 	public void convertType3() throws Exception {
-		int t = BrokerSession.convertType("3");
+		int t = ProviderSession.convertType("3");
 		Assert.assertEquals(t, Session.DUPS_OK_ACKNOWLEDGE);
 	}
 	
 	@Test(expected=Exception.class)
 	public void convertType4() throws Exception {
-		BrokerSession.convertType("4");
+		ProviderSession.convertType("4");
 	}
 	
 	@Test
 	public void convertTypeSessionTransacted() throws Exception {
-		int t = BrokerSession.convertType(BrokerSession.SESSION_TRANSACTED);
+		int t = ProviderSession.convertType(ProviderSession.SESSION_TRANSACTED);
 		Assert.assertEquals(t, Session.SESSION_TRANSACTED);
 	}
 	
 	@Test
 	public void convertTypeAutoAcnowledge() throws Exception {
-		int t = BrokerSession.convertType(BrokerSession.AUTO_ACKNOWLEDGE);
+		int t = ProviderSession.convertType(ProviderSession.AUTO_ACKNOWLEDGE);
 		Assert.assertEquals(t, Session.AUTO_ACKNOWLEDGE);
 	}
 	
 	@Test
 	public void convertTypeClientAcknowledge() throws Exception {
-		int t = BrokerSession.convertType(BrokerSession.CLIENT_ACKNOWLEDGE);
+		int t = ProviderSession.convertType(ProviderSession.CLIENT_ACKNOWLEDGE);
 		Assert.assertEquals(t, Session.CLIENT_ACKNOWLEDGE);
 	}
 	
 	@Test
 	public void convertTypeDupsOkAcknowledge() throws Exception {
-		int t = BrokerSession.convertType(BrokerSession.DUPS_OK_ACKNOWLEDGE);
+		int t = ProviderSession.convertType(ProviderSession.DUPS_OK_ACKNOWLEDGE);
 		Assert.assertEquals(t, Session.DUPS_OK_ACKNOWLEDGE);
 	}
 }

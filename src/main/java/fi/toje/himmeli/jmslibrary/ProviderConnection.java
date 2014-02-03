@@ -4,12 +4,12 @@ import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
-public class BrokerConnection {
+public class ProviderConnection {
 	
 	private Connection connection;
-	private BrokerSession brokerSession;
+	private ProviderSession providerSession;
 	
-	public BrokerConnection(Connection connection) throws Exception {
+	public ProviderConnection(Connection connection) throws Exception {
 		this.connection = connection;
 	}
 	
@@ -46,15 +46,15 @@ public class BrokerConnection {
 	 */
 	public void close() throws JMSException {
 		stop();
-		if (brokerSession != null) {
-			brokerSession.close();
+		if (providerSession != null) {
+			providerSession.close();
 		}
 		connection.close();
 	}
 	
 	public void closeSession() throws JMSException {
-		if (brokerSession != null) {
-			brokerSession.close();
+		if (providerSession != null) {
+			providerSession.close();
 		}
 	}
 	
@@ -65,12 +65,12 @@ public class BrokerConnection {
 		return connection;
 	}
 	
-	public BrokerSession getBrokerSession() {
-		return brokerSession;
+	public ProviderSession getProviderSession() {
+		return providerSession;
 	}
 	
 	public Session getSession() {
-		return brokerSession.getSession();
+		return providerSession.getSession();
 	}
 	
 	/**
@@ -83,9 +83,9 @@ public class BrokerConnection {
 	 * @throws JMSException
 	 */
 	public void initSession(boolean transacted, String type) throws Exception {
-		if (brokerSession != null) {
-			brokerSession.close();
+		if (providerSession != null) {
+			providerSession.close();
 		}
-		brokerSession = new BrokerSession(connection.createSession(transacted, BrokerSession.convertType(type)));
+		providerSession = new ProviderSession(connection.createSession(transacted, ProviderSession.convertType(type)));
 	}
 }
