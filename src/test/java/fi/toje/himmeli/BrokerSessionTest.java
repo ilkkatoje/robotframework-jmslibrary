@@ -1,6 +1,7 @@
 package fi.toje.himmeli;
 
 import javax.jms.DeliveryMode;
+import javax.jms.Session;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -41,5 +42,58 @@ public class BrokerSessionTest {
 	@Test(expected=Exception.class)
 	public void convertDeliveryModeWrongInt() throws Exception {
 		BrokerSession.convertDeliveryMode(123);
+	}
+	
+	@Test
+	public void convertType0() throws Exception {
+		int t = BrokerSession.convertType("0");
+		Assert.assertEquals(t, Session.SESSION_TRANSACTED);
+	}
+	
+	@Test
+	public void convertType1() throws Exception {
+		int t = BrokerSession.convertType("1");
+		Assert.assertEquals(t, Session.AUTO_ACKNOWLEDGE);
+	}
+	
+	@Test
+	public void convertType2() throws Exception {
+		int t = BrokerSession.convertType("2");
+		Assert.assertEquals(t, Session.CLIENT_ACKNOWLEDGE);
+	}
+	
+	@Test
+	public void convertType3() throws Exception {
+		int t = BrokerSession.convertType("3");
+		Assert.assertEquals(t, Session.DUPS_OK_ACKNOWLEDGE);
+	}
+	
+	@Test(expected=Exception.class)
+	public void convertType4() throws Exception {
+		BrokerSession.convertType("4");
+	}
+	
+	@Test
+	public void convertTypeSessionTransacted() throws Exception {
+		int t = BrokerSession.convertType(BrokerSession.SESSION_TRANSACTED);
+		Assert.assertEquals(t, Session.SESSION_TRANSACTED);
+	}
+	
+	@Test
+	public void convertTypeAutoAcnowledge() throws Exception {
+		int t = BrokerSession.convertType(BrokerSession.AUTO_ACKNOWLEDGE);
+		Assert.assertEquals(t, Session.AUTO_ACKNOWLEDGE);
+	}
+	
+	@Test
+	public void convertTypeClientAcknowledge() throws Exception {
+		int t = BrokerSession.convertType(BrokerSession.CLIENT_ACKNOWLEDGE);
+		Assert.assertEquals(t, Session.CLIENT_ACKNOWLEDGE);
+	}
+	
+	@Test
+	public void convertTypeDupsOkAcknowledge() throws Exception {
+		int t = BrokerSession.convertType(BrokerSession.DUPS_OK_ACKNOWLEDGE);
+		Assert.assertEquals(t, Session.DUPS_OK_ACKNOWLEDGE);
 	}
 }

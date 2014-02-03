@@ -622,4 +622,31 @@ public class BrokerSession {
 		
 		return t;
 	}
+	
+	/**
+	 * 
+	 * @param type
+	 * @return
+	 * @throws Exception
+	 */
+	public static int convertType(String type) throws Exception {
+		int t = 0;
+		if (SESSION_TRANSACTED.equals(type) || String.valueOf(Session.SESSION_TRANSACTED).equals(type)) {
+			t = Session.SESSION_TRANSACTED;
+		}
+		else if (CLIENT_ACKNOWLEDGE.equals(type) || String.valueOf(Session.CLIENT_ACKNOWLEDGE).equals(type)) {
+			t = Session.CLIENT_ACKNOWLEDGE;
+		}
+		else if (DUPS_OK_ACKNOWLEDGE.equals(type) || String.valueOf(Session.DUPS_OK_ACKNOWLEDGE).equals(type)) {
+			t = Session.DUPS_OK_ACKNOWLEDGE;
+		}
+		else if (AUTO_ACKNOWLEDGE.equals(type) || String.valueOf(Session.AUTO_ACKNOWLEDGE).equals(type)) {
+			t = Session.AUTO_ACKNOWLEDGE;
+		}
+		else {
+			throw new Exception("Invalid type: " + type);
+		}
+		
+		return t;
+	}
 }

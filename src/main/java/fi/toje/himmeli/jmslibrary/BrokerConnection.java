@@ -86,33 +86,6 @@ public class BrokerConnection {
 		if (brokerSession != null) {
 			brokerSession.close();
 		}
-		brokerSession = new BrokerSession(connection.createSession(transacted, convertType(type)));
-	}
-	
-	/**
-	 * 
-	 * @param type
-	 * @return
-	 * @throws Exception
-	 */
-	public static int convertType(String type) throws Exception {
-		int t = 0;
-		if (BrokerSession.SESSION_TRANSACTED.equals(type) || String.valueOf(Session.SESSION_TRANSACTED).equals(type)) {
-			t = Session.SESSION_TRANSACTED;
-		}
-		else if (BrokerSession.CLIENT_ACKNOWLEDGE.equals(type) || String.valueOf(Session.CLIENT_ACKNOWLEDGE).equals(type)) {
-			t = Session.CLIENT_ACKNOWLEDGE;
-		}
-		else if (BrokerSession.DUPS_OK_ACKNOWLEDGE.equals(type) || String.valueOf(Session.DUPS_OK_ACKNOWLEDGE).equals(type)) {
-			t = Session.DUPS_OK_ACKNOWLEDGE;
-		}
-		else if (BrokerSession.AUTO_ACKNOWLEDGE.equals(type) || String.valueOf(Session.AUTO_ACKNOWLEDGE).equals(type)) {
-			t = Session.AUTO_ACKNOWLEDGE;
-		}
-		else {
-			throw new Exception("Invalid type: " + type);
-		}
-		
-		return t;
+		brokerSession = new BrokerSession(connection.createSession(transacted, BrokerSession.convertType(type)));
 	}
 }
