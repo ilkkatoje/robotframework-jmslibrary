@@ -73,7 +73,7 @@ public class JMSLibrary {
 	
 	/**
 	 * Settings for selecting JMS provider. Default JNDI connection factory
-	 * look up string is _ConnectionFactory_.
+	 * look up string is 'ConnectionFactory'.
 	 * 
 	 * Optional settings:
 	 * - _connection_factory_name_:  lookup name for connection factory
