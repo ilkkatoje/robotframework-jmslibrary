@@ -1,5 +1,4 @@
 *** Settings ***
-Library         String
 Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Suite Setup     Connect And Start
 Suite Teardown  Close Connection
@@ -11,22 +10,21 @@ ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFacto
 ${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
 ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
 ${TOPIC}                    TOPIC.JMSLIBRARY.TEST
+${TEXT}                     Hello world!
 
 *** Test Cases ***
 Queue Send and Receive TextMessage
-    ${text}=  Generate Random String
-    Create Text Message  ${text}
+    Create Text Message  ${TEXT}
     Send To Queue  ${QUEUE}
     Receive From Queue  ${QUEUE}
     ${body}=  Get Text
-    Should Be Equal  ${body}  ${text}
+    Should Be Equal  ${body}  ${TEXT}
 
 Topic Send and Receive TextMessage
-    ${text}=  Generate Random String
     Subscribe  ${TOPIC}
-    Create Text Message  ${text}
+    Create Text Message  ${TEXT}
     Send To Topic  ${TOPIC}
     Receive From Topic
     ${body}=  Get Text
-    Should Be Equal  ${body}  ${text}
+    Should Be Equal  ${body}  ${TEXT}
     Unsubscribe

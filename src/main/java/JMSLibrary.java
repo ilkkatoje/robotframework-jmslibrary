@@ -13,23 +13,22 @@ import fi.toje.himmeli.jmslibrary.ProviderConnection;
 import fi.toje.himmeli.jmslibrary.ProviderSession;
 
 /**
- * Robot Framework library for testing applications utilizing JMS.
+ * Robot Framework library for testing JMS applications.
  * 
- * Set the library and chosen JMS provider jars into classpath and start
- * testing.
+ * Set the library and JMS provider jars into classpath and start testing.
  * 
  * Library uses one connection which has one session. Session includes one
- * message producer and one message consumer for topic. Queue consumers are
- * created on the fly when receiving. Currently, messages can be received only 
- * from one topic at time. Producer specific settings (timeToLive etc.) apply
- * within a session. Settings will be reset, if session is reinitialized.
+ * message producer (handles both queues and topics) and one message consumer
+ * for topic. Currently, messages can be received only from one topic at time.
+ * Queue consumers are created on the fly when receiving. Producer specific
+ * settings (timeToLive etc.) apply within a session. Settings will be reset,
+ * if session is reinitialized.
  * 
  * Default receive timeout is 100 ms.
  * 
  * = Example with ActiveMQ =
  * 
  * | *** Settings ***
- * | Library         String
  * | Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
  * | Suite Setup     Connect And Start
  * | Suite Teardown  Close Connection
@@ -41,24 +40,23 @@ import fi.toje.himmeli.jmslibrary.ProviderSession;
  * | ${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
  * | ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
  * | ${TOPIC}                    TOPIC.JMSLIBRARY.TEST
+ * | ${TEXT}                     Hello world!
  * |
  * | *** Test Cases ***
  * | Queue Send and Receive TextMessage
- * |     ${text}=  Generate Random String
- * |     Create Text Message  ${text}
+ * |     Create Text Message  ${TEXT}
  * |     Send To Queue  ${QUEUE}
  * |     Receive From Queue  ${QUEUE}
  * |     ${body}=  Get Text
- * |     Should Be Equal  ${body}  ${text}
+ * |     Should Be Equal  ${body}  ${TEXT}
  * |
  * | Topic Send and Receive TextMessage
  * |     Subscribe  ${TOPIC}
- * |     ${text}=  Generate Random String
- * |     Create Text Message  ${text}
+ * |     Create Text Message  ${TEXT}
  * |     Send To Topic  ${TOPIC}
  * |     Receive From Topic
  * |     ${body}=  Get Text
- * |     Should Be Equal  ${body}  ${text}
+ * |     Should Be Equal  ${body}  ${TEXT}
  * |     Unsubscribe
  */
 public class JMSLibrary {
@@ -291,7 +289,7 @@ public class JMSLibrary {
 	 * JMSReplyTo queue of message.
 	 * 
 	 * Returns queue if it was set and was type of queue, otherwise (not set or
-	 * is topic) null 
+	 * is topic) None.
 	 */
 	public String getJMSReplyToQueue() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
@@ -310,7 +308,7 @@ public class JMSLibrary {
 	 * JMSReplyTo value of message.
 	 * 
 	 * Returns topic if it was set and was type of topic, otherwise (not set or
-	 * is queue) null 
+	 * is queue) None.
 	 */
 	public String getJMSReplyToTopic() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
@@ -368,7 +366,7 @@ public class JMSLibrary {
 	/**
 	 * JMSRedelivered of received message.
 	 * 
-	 * Return true if message was redelivered
+	 * Returns true if message was redelivered.
 	 */
 	public boolean getJMSRedelivered() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
@@ -424,6 +422,8 @@ public class JMSLibrary {
 	/**
 	 * Receives message from queue. The message is set to internal message
 	 * object and its body and properties can be accessed via methods.
+	 * 
+	 * Fails if message is not available.
 	 */
 	public void receiveFromQueue(String queue) throws Exception {
 		ProviderSession ps = providerConnection.getProviderSession();
@@ -433,6 +433,8 @@ public class JMSLibrary {
 	/**
 	 * Receives message from queue. The message is set to internal message
 	 * object and its body and properties can be accessed via methods.
+	 * 
+	 * Fails if message is not available.
 	 * 
 	 * Arguments:
 	 * - _queue_: name of the queue
@@ -495,6 +497,8 @@ public class JMSLibrary {
 	
 	/**
 	 * Subscribe (Subscribe Durable) must have been called before this.
+	 * 
+	 * Fails if message is not available.
 	 */
 	public void receiveFromTopic() throws Exception {
 		ProviderSession ps = providerConnection.getProviderSession();
@@ -503,6 +507,8 @@ public class JMSLibrary {
 	
 	/**
 	 * Subscribe (Subscribe Durable) must have been called before this.
+	 * 
+	 * Fails if message is not available.
 	 * 
 	 * Argument:
 	 * - _timeout_: receive timeout in milliseconds
