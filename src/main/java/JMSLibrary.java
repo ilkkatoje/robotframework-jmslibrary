@@ -58,7 +58,7 @@ import fi.toje.himmeli.jmslibrary.Options;
 public class JMSLibrary {
 
 	public static final String ROBOT_LIBRARY_SCOPE = "TEST SUITE";
-	public static final String ROBOT_LIBRARY_VERSION = "1.0.0-beta.3";
+	public static final String ROBOT_LIBRARY_VERSION = "1.0.0-beta.3-SNAPSHOT";
 	
 	private InitialContext initialContext;
 	private ConnectionFactory connectionFactory;
