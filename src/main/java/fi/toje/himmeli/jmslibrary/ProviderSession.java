@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
 import java.util.HashMap;
 
 import javax.jms.BytesMessage;
-import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -21,23 +21,13 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 
 public class ProviderSession {
-
-	public static final String AUTO_ACKNOWLEDGE = "AUTO_ACKNOWLEDGE";
-	public static final String CLIENT_ACKNOWLEDGE = "CLIENT_ACKNOWLEDGE";
-	public static final String DUPS_OK_ACKNOWLEDGE = "DUPS_OK_ACKNOWLEDGE";
-	public static final String SESSION_TRANSACTED = "SESSION_TRANSACTED";
-	
-	public static final String DELIVERY_MODE_PERSISTENT = "PERSISTENT";
-	public static final String DELIVERY_MODE_NON_PERSISTENT = "NON_PERSISTENT";
 	
 	private static final int DEFAULT_BUFFER = 8192;
 	private static final long DEFAULT_RECEIVE_TIMEOUT = 100;
 	
 	private Session session;
 	private MessageProducer producer;
-	private long timeToLive = 0;
-	private int deliveryMode = DeliveryMode.PERSISTENT;
-	private MessageConsumer topicConsumer;
+	private MessageConsumer consumer;
 	private HashMap<String, Queue> queues;
 	private HashMap<String, Topic> topics;
 	private Message message;
@@ -46,18 +36,27 @@ public class ProviderSession {
 		this.session = session;
 		queues = new HashMap<String, Queue>();
 		topics = new HashMap<String, Topic>();
+		initProducer();
 	}
 	
 	public Session getSession() {
 		return session;
 	}
 	
+	public MessageProducer getProducer() {
+		return producer;
+	}
+	
+	public Message getMessage() {
+		return message;
+	}
+	
 	public void close() throws JMSException {
 		if (producer != null) {
 			producer.close();
 		}
-		if (topicConsumer != null) {
-			topicConsumer.close();
+		if (consumer != null) {
+			consumer.close();
 		}
 		if (session != null) {
 			session.close();
@@ -79,6 +78,15 @@ public class ProviderSession {
 	 */
 	public String getText() throws JMSException {
 		return ((TextMessage)message).getText();
+	}
+	
+	public String getBytesAsString(String charset) throws JMSException, UnsupportedEncodingException {
+		long length = ((BytesMessage)message).getBodyLength();
+		byte[] bytes = new byte[(int)length];
+		((BytesMessage)message).readBytes(bytes, (int)length);
+		String text = new String(bytes, charset);
+		
+		return text;
 	}
 	
 	/**
@@ -104,6 +112,16 @@ public class ProviderSession {
 		fis.close();
 	}
 	
+	public void createBytesMessage(String text, String charset) throws JMSException, IOException {
+		message = null;
+		BytesMessage bytesMessage = session.createBytesMessage();
+		byte[] bytes = text.getBytes(charset);
+		bytesMessage.writeBytes(bytes);
+		
+		System.out.println(bytes.length + " wrote to message.");
+		message = bytesMessage;
+	}
+	
 	/**
 	 * Writes BytesMessage's body into file.
 	 * 
@@ -111,8 +129,8 @@ public class ProviderSession {
 	 * @throws IOException 
 	 * @throws JMSException 
 	 */
-	public void writeBytes(String file) throws JMSException, IOException {
-		FileOutputStream fos = new FileOutputStream(new File(file));
+	public void writeBytes(String file, boolean append) throws JMSException, IOException {
+		FileOutputStream fos = new FileOutputStream(new File(file), append);
 		BytesMessage bytesMessage = (BytesMessage)message;
 		byte[] bytes = new byte[DEFAULT_BUFFER];
 		int c = 0;
@@ -125,7 +143,7 @@ public class ProviderSession {
 		fos.close();
 	}
 	
-	public void setType(String type) throws JMSException {
+	public void setJmsType(String type) throws JMSException {
 		message.setJMSType(type);
 	}
 	
@@ -137,15 +155,19 @@ public class ProviderSession {
 		return message.getJMSRedelivered();
 	}
 	
-	public void setCorrelationId(String correlationId) throws JMSException {
+	public int getJmsPriority() throws JMSException {
+		return message.getJMSPriority();
+	}
+	
+	public void setJmsCorrelationId(String correlationId) throws JMSException {
 		message.setJMSCorrelationID(correlationId);
 	}
 	
-	public String getCorrelationId() throws JMSException {
+	public String getJmsCorrelationId() throws JMSException {
 		return message.getJMSCorrelationID();
 	}
 	
-	public void setReplyToQueue(String queue) throws JMSException {
+	public void setJmsReplyToQueue(String queue) throws JMSException {
 		Queue q = getQueue(queue);
 		message.setJMSReplyTo(q);
 	}
@@ -172,12 +194,7 @@ public class ProviderSession {
 		return ret;
 	}
 	
-	/**
-	 * 
-	 * @param topic
-	 * @throws JMSException
-	 */
-	public void setReplyToTopic(String topic) throws JMSException {
+	public void setJmsReplyToTopic(String topic) throws JMSException {
 		Topic t = getTopic(topic);
 		message.setJMSReplyTo(t);
 	}
@@ -204,97 +221,21 @@ public class ProviderSession {
 	}
 	
 	/**
-	 * @param timeToLive
-	 * @throws JMSException
-	 */
-	public void setProducerTimeToLive(long timeToLive) throws JMSException {
-		this.timeToLive = timeToLive;
-		if (producer != null) { 
-			producer.setTimeToLive(timeToLive);
-		}
-	}
-	
-	/**
-	 * 
-	 * @param deliveryMode, either string value or numeric value
-	 * @throws Exception
-	 */
-	public void setProducerDeliveryMode(String deliveryMode) throws Exception {
-		this.deliveryMode = convertDeliveryMode(deliveryMode);
-		if (producer != null) {
-			producer.setDeliveryMode(this.deliveryMode);
-		}
-	}
-	
-	/**
 	 * Gets String representation or delivery mode.
 	 * 
 	 * @return
 	 * @throws Exception
 	 */
-	public String getProducerDeliveryMode() throws Exception {
-		int d;
-		if (producer != null) {
-			d = producer.getDeliveryMode();
-		}
-		else {
-			d = deliveryMode;
+	public int getProducerDeliveryMode() throws Exception {
+		if (producer == null) {
+			producer = session.createProducer(null);
 		}
 		
-		return convertDeliveryMode(d);
+		return producer.getDeliveryMode();
 	}
 	
-	/**
-	 * Get delivery mode of message.
-	 * 
-	 * @return
-	 * @throws Exception
-	 */
-	public String getDeliveryMode() throws Exception {
-		return convertDeliveryMode(message.getJMSDeliveryMode());
-	}
-	
-	/**
-	 * 
-	 * @param delivery
-	 * @return
-	 * @throws Exception
-	 */
-	public static String convertDeliveryMode(int delivery) throws Exception {
-		String dm;
-		switch(delivery) {
-			case DeliveryMode.PERSISTENT:
-				dm = DELIVERY_MODE_PERSISTENT;
-				break;
-			case DeliveryMode.NON_PERSISTENT:
-				dm = DELIVERY_MODE_NON_PERSISTENT;
-				break;
-			default:
-				throw new Exception("Invalid delivery mode");
-		}
-		
-		return dm;
-	}
-	
-	/**
-	 * 
-	 * @param delivery
-	 * @return
-	 * @throws Exception
-	 */
-	public static int convertDeliveryMode(String deliveryMode) throws Exception {
-		int dm;
-		if (DELIVERY_MODE_PERSISTENT.equals(deliveryMode) || String.valueOf(DeliveryMode.PERSISTENT).equals(deliveryMode)) {
-			dm = DeliveryMode.PERSISTENT;
-		}
-		else if (DELIVERY_MODE_NON_PERSISTENT.equals(deliveryMode) || String.valueOf(DeliveryMode.NON_PERSISTENT).equals(deliveryMode)) {
-			dm = DeliveryMode.NON_PERSISTENT;
-		}
-		else {
-			throw new Exception("Invalid delivery mode");
-		}
-		
-		return dm;
+	public int getJmsDeliveryMode() throws Exception {
+		return message.getJMSDeliveryMode();
 	}
 	
 	/**
@@ -303,94 +244,102 @@ public class ProviderSession {
 	 * @return
 	 * @throws JMSException
 	 */
-	public long getExpiration() throws JMSException {
+	public long getJmsExpiration() throws JMSException {
 		return message.getJMSExpiration();
 	}
 	
-	/**
-	 * 
-	 * @param name
-	 * @param value
-	 * @throws JMSException
-	 */
 	public void setStringProperty(String name, String value) throws JMSException {
 		message.setStringProperty(name, value);
 	}
 	
-	/**
-	 * 
-	 * @param name
-	 * @return
-	 * @throws JMSException
-	 */
 	public String getStringProperty(String name) throws JMSException {
 		return message.getStringProperty(name);
 	}
 	
-	/**
-	 * 
-	 * @return
-	 * @throws JMSException
-	 */
-	public String getMessageId() throws JMSException {
+	public String getJmsMessageId() throws JMSException {
 		return message.getJMSMessageID();
 	}
 	
-	/**
-	 * 
-	 * @param queue
-	 * @throws Exception
-	 */
 	public void sendToQueue(String queue) throws Exception {
 		Queue q = getQueue(queue);
-		if (producer == null) {
-			producer = getProducer();
-		}
 		
 		producer.send(q, message);
 	}
 	
+	public void receive() throws Exception {
+		receive(DEFAULT_RECEIVE_TIMEOUT);
+	}
+	
+	public void receive(long timeout) throws Exception {
+		message = null;
+		if (consumer != null) {
+			message = consumer.receive(timeout);
+			if (message == null) {
+				throw new Exception("No message available.");
+			}
+		}
+		else {
+			throw new Exception("Consumer is not specified.");
+		}
+	}
+	
 	/**
-	 * Receives message from queue. Uses existing queueConsumer if available and
-	 * having the same destination.
+	 * Receives message from queue. Creates consumer on the fly (does not use
+	 * the ProviderSession's consumer).
 	 * 
 	 * @param queue
 	 * @throws Exception if no message available
 	 */
-	public void receiveFromQueue(String queue) throws Exception {
-		receiveFromQueue(queue, DEFAULT_RECEIVE_TIMEOUT);
+	public void receiveOnceFromQueue(String queue) throws Exception {
+		receiveOnceFromQueue(queue, DEFAULT_RECEIVE_TIMEOUT);
 	}
 	
 	/**
-	 * Receives message from queue. Uses existing queueConsumer if available and
-	 * having the same destination.
+	 * Receives message from queue. Creates consumer on the fly (does not use
+	 * the ProviderSession's consumer).
 	 * 
 	 * @param queue
 	 * @param timeout
 	 * @throws Exception
 	 */
-	public void receiveFromQueue(String queue, long timeout) throws Exception {
+	public void receiveOnceFromQueue(String queue, long timeout) throws Exception {
 		message = null;
 		MessageConsumer queueConsumer = session.createConsumer(getQueue(queue));
 		message = queueConsumer.receive(timeout);
+		if (message != null) {
+			if (session.getTransacted()) {
+				session.commit();
+			}
+			else {
+				if (session.getAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE) {
+					message.acknowledge();
+				}
+			}
+		}
 		queueConsumer.close();
 		if (message == null) {
-			throw new Exception("No message available");
+			throw new Exception("No message available.");
 		}
 	}
 	
-	/**
-	 * 
-	 * @param topic
-	 * @throws Exception
-	 */
 	public void sendToTopic(String topic) throws Exception {
 		Topic t = getTopic(topic);
-		if (producer == null) {
-			producer = getProducer();
-		}
 		
 		producer.send(t, message);
+	}
+	
+	/**
+	 * Create queue consumer. Closes previous consumer if existed.
+	 * 
+	 * @param topic
+	 * @throws JMSException
+	 */
+	public void initializeQueueConsumer(String queue) throws JMSException {
+		Queue q = getQueue(queue);
+		if (consumer != null) {
+			consumer.close();
+		}
+		consumer = session.createConsumer(q);
 	}
 	
 	/**
@@ -399,45 +348,58 @@ public class ProviderSession {
 	 * @param topic
 	 * @throws JMSException
 	 */
-	public void subscribe(String topic) throws JMSException {
+	public void initializeTopicConsumer(String topic) throws JMSException {
 		Topic t = getTopic(topic);
-		if (topicConsumer != null) {
-			topicConsumer.close();
+		if (consumer != null) {
+			consumer.close();
 		}
-		topicConsumer = session.createConsumer(t);
+		consumer = session.createConsumer(t);
+	}
+	
+	public void initProducer() throws JMSException {
+		if (producer != null) {
+			producer.close();
+		}
+		producer = session.createProducer(null);
+	}
+	
+	public void initProducer(int deliveryMode, int priority, long timeToLive) throws JMSException {
+		if (producer != null) {
+			producer.close();
+		}
+		producer = session.createProducer(null);
+		producer.setDeliveryMode(deliveryMode);
+		producer.setPriority(priority);
+		producer.setTimeToLive(timeToLive);
 	}
 	
 	/**
-	 * Unsubscribes topic. Just closes the consumer. Can be used also with
+	 * Just closes the consumer. Can be used also with
 	 * durable subscription.
 	 * 
 	 * @throws JMSException
 	 */
-	public void unsubscribe() throws JMSException {
-		topicConsumer.close();
-	}
-	
-	/**
-	 * @param topic
-	 * @param name
-	 * @throws JMSException
-	 */
-	public void subscribeDurable(String topic, String name) throws JMSException {
-		Topic t = this.getTopic(topic);
-		if (topicConsumer != null) {
-			topicConsumer.close();
+	public void closeConsumer() throws JMSException {
+		if (consumer != null) {
+			consumer.close();
 		}
-		topicConsumer = session.createDurableSubscriber(t, name);
+	}
+	
+	public void initializeDurableSubscriber(String topic, String name) throws JMSException {
+		Topic t = this.getTopic(topic);
+		if (consumer != null) {
+			consumer.close();
+		}
+		consumer = session.createDurableSubscriber(t, name);
 	}
 	
 	/**
-	 * Unsubscribes durable topic subscription. Closes topic consumer as well.
+	 * Unsubscribes durable topic subscription.
 	 * 
 	 * @param name
 	 * @throws JMSException
 	 */
-	public void unsubscribeDurable(String name) throws JMSException {
-		topicConsumer.close();
+	public void unsubscribe(String name) throws JMSException {
 		session.unsubscribe(name);
 	}
 	
@@ -458,7 +420,7 @@ public class ProviderSession {
 	 */
 	public void receiveFromTopic(long timeout) throws Exception {
 		message = null;
-		message = topicConsumer.receive(timeout);
+		message = consumer.receive(timeout);
 		if (message == null) {
 			throw new Exception("No message available");
 		}
@@ -473,18 +435,10 @@ public class ProviderSession {
 		message.acknowledge();
 	}
 	
-	/**
-	 * 
-	 * @throws JMSException
-	 */
 	public void commit() throws JMSException {
 		session.commit();
 	}
 	
-	/**
-	 * 
-	 * @throws JMSException
-	 */
 	public void rollback() throws JMSException {
 		session.rollback();
 	}
@@ -550,11 +504,11 @@ public class ProviderSession {
 	 * @return
 	 * @throws JMSException
 	 */
-	public int clearTopic() throws JMSException {
+	public int clear() throws JMSException {
 		int count = 0;
 		Message lastMessage = null;
 		do {
-			lastMessage = topicConsumer.receive(DEFAULT_RECEIVE_TIMEOUT);
+			lastMessage = consumer.receive(DEFAULT_RECEIVE_TIMEOUT);
 			if (lastMessage != null) {
 				count++;
 				if (session.getTransacted()) {
@@ -570,22 +524,6 @@ public class ProviderSession {
 		while (lastMessage != null);
 		
 		return count;
-	}
-	
-	/**
-	 * Gets message producer. Sets producer attributes.
-	 * 
-	 * @return
-	 * @throws JMSException
-	 */
-	private MessageProducer getProducer() throws JMSException {
-		if (producer == null) {
-			producer = session.createProducer(null);
-			producer.setTimeToLive(timeToLive);
-			producer.setDeliveryMode(deliveryMode);
-		}
-		
-		return producer;
 	}
 	
 	/**
@@ -623,33 +561,6 @@ public class ProviderSession {
 		else {
 			t = session.createTopic(topic);
 			topics.put(topic, t);
-		}
-		
-		return t;
-	}
-	
-	/**
-	 * 
-	 * @param type
-	 * @return
-	 * @throws Exception
-	 */
-	public static int convertType(String type) throws Exception {
-		int t = 0;
-		if (SESSION_TRANSACTED.equals(type) || String.valueOf(Session.SESSION_TRANSACTED).equals(type)) {
-			t = Session.SESSION_TRANSACTED;
-		}
-		else if (CLIENT_ACKNOWLEDGE.equals(type) || String.valueOf(Session.CLIENT_ACKNOWLEDGE).equals(type)) {
-			t = Session.CLIENT_ACKNOWLEDGE;
-		}
-		else if (DUPS_OK_ACKNOWLEDGE.equals(type) || String.valueOf(Session.DUPS_OK_ACKNOWLEDGE).equals(type)) {
-			t = Session.DUPS_OK_ACKNOWLEDGE;
-		}
-		else if (AUTO_ACKNOWLEDGE.equals(type) || String.valueOf(Session.AUTO_ACKNOWLEDGE).equals(type)) {
-			t = Session.AUTO_ACKNOWLEDGE;
-		}
-		else {
-			throw new Exception("Invalid type: " + type);
 		}
 		
 		return t;

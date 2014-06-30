@@ -4,35 +4,33 @@ Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}  WITH NA
 Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}  WITH NAME  jms2
 Suite Setup     Initialize Suite
 Suite Teardown  Deinitialize Suite
-Test Setup      jms1.Clear Queue  ${QUEUE}
-Test Tear Down  jms1.Clear Queue  ${QUEUE}
 
 *** Variables ***
 ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
 ${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
 ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
 ${TOPIC}                    TOPIC.JMSLIBRARY.TEST
-${BODY_TEXT_1}              Hello world 1!
-${BODY_TEXT_2}              Hello world 2!
 
 *** Test Cases ***
 Queue Send and Receive TextMessage
+    [Setup]  jms1.Clear Queue Once  ${QUEUE}
     ${text}=  Generate Random String
     jms1.Create Text Message  ${text}
     jms1.Send To Queue  ${QUEUE}
-    jms2.Receive From Queue  ${QUEUE}
+    jms2.Receive Once From Queue  ${QUEUE}
     ${body}=  jms2.Get Text
     Should Be Equal  ${body}  ${text}
+    [Teardown]  jms1.Clear Queue Once  ${QUEUE}
 
 Topic Send and Receive TextMessage
+    [Setup]  jms2.Init Topic Consumer  ${TOPIC}
     ${text}=  Generate Random String
-    jms2.Subscribe  ${TOPIC}
     jms1.Create Text Message  ${text}
     jms1.Send To Topic  ${TOPIC}
-    jms2.Receive From Topic
+    jms2.Receive
     ${body}=  jms2.Get Text
     Should Be Equal  ${body}  ${text}
-    jms2.Unsubscribe
+    [Teardown]  jms2.Close Consumer
 
 *** Keywords ***
 Initialize Suite

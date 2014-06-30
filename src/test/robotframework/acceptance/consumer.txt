@@ -1,0 +1,32 @@
+*** Settings ***
+Library         BuiltIn
+Library         String
+Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
+Suite Setup     Connect And Start
+Suite Teardown  Close Connection
+
+*** Variables ***
+${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
+${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
+${QUEUE1}                   QUEUE.JMSLIBRARY.TEST.1
+${QUEUE2}                   QUEUE.JMSLIBRARY.TEST.2
+
+*** Test Cases ***
+Queue Consumer
+    [Setup]  Run Keywords  Clear Queue Once  ${QUEUE1}  AND  Clear Queue Once  ${QUEUE2}
+    ${text1}=  Generate Random String
+    ${text2}=  Generate Random String
+    Create Text Message  ${text1}
+    Send To Queue  ${QUEUE1}
+    Create Text Message  ${text2}
+    Send To Queue  ${QUEUE2}
+    Init Queue Consumer  ${QUEUE1}
+    Receive
+    ${body1}=  Get Text
+    Should Be Equal  ${body1}  ${text1}
+    Init Queue Consumer  ${QUEUE2}
+    Receive
+    ${body2}=  Get Text
+    Should Be Equal  ${body2}  ${text2}
+    Close Consumer
+    [Teardown]  Run Keywords  Clear Queue Once  ${QUEUE1}  AND  Clear Queue Once  ${QUEUE2}

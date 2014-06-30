@@ -2,8 +2,6 @@
 Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Suite Setup     Connect And Start
 Suite Teardown  Close Connection
-Test Setup      Clear Queue  ${QUEUE}
-Test Tear Down  Clear Queue  ${QUEUE}
 
 *** Variables ***
 ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
@@ -14,17 +12,18 @@ ${TEXT}                     Hello world!
 
 *** Test Cases ***
 Queue Send and Receive TextMessage
+    [Setup]  Clear Queue Once  ${QUEUE}
     Create Text Message  ${TEXT}
     Send To Queue  ${QUEUE}
-    Receive From Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}  
     ${body}=  Get Text
     Should Be Equal  ${body}  ${TEXT}
 
 Topic Send and Receive TextMessage
-    Subscribe  ${TOPIC}
+    [Setup]  Init Topic Consumer  ${TOPIC}
     Create Text Message  ${TEXT}
     Send To Topic  ${TOPIC}
-    Receive From Topic
+    Receive
     ${body}=  Get Text
     Should Be Equal  ${body}  ${TEXT}
-    Unsubscribe
+    [Teardown]  Close Consumer

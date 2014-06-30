@@ -3,52 +3,79 @@ Documentation   Test suite which deals with settings related to session scope, h
 Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Suite Setup		Connect And Start
 Suite Teardown	Close Connection
-Test Setup      Clear Queue  ${QUEUE}
-Test Tear Down  Clear Queue  ${QUEUE}
+Test Setup      Clear Queue Once  ${QUEUE}
+Test Tear Down  Clear Queue Once  ${QUEUE}
 
 *** Variables ***
 ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
 ${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
 ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
-${BODY_TEXT}                Hello world!
+${TEXT}                     Hello world!
 
 *** Test Cases ***
 Persistent Delivery Mode with Number
     Set Producer Delivery Mode  2
     ${v}=  Get Producer Delivery Mode
     Should Be Equal  PERSISTENT  ${v}
-	Create Text Message  ${BODY_TEXT}
+	Create Text Message  ${TEXT}
 	Send To Queue  ${QUEUE}
-	Receive From Queue  ${QUEUE}
-	${v}=  Get Delivery Mode
+	Receive Once From Queue  ${QUEUE}
+	${v}=  Get JMS Delivery Mode
     Should Be Equal  PERSISTENT  ${v}
 
 Non-Persistent Delivery Mode with Number
     Set Producer Delivery Mode  1
     ${v}=  Get Producer Delivery Mode
     Should Be Equal  NON_PERSISTENT  ${v}
-	Create Text Message  ${BODY_TEXT}
+	Create Text Message  ${TEXT}
 	Send To Queue  ${QUEUE}
-	Receive From Queue  ${QUEUE}
-	${v}=  Get Delivery Mode
+	Receive Once From Queue  ${QUEUE}
+	${v}=  Get JMS Delivery Mode
     Should Be Equal  NON_PERSISTENT  ${v}
 
 Persistent Delivery Mode
     Set Producer Delivery Mode  PERSISTENT
     ${v}=  Get Producer Delivery Mode
     Should Be Equal  PERSISTENT  ${v}
-	Create Text Message  ${BODY_TEXT}
+	Create Text Message  ${TEXT}
 	Send To Queue  ${QUEUE}
-	Receive From Queue  ${QUEUE}
-	${v}=  Get Delivery Mode
+	Receive Once From Queue  ${QUEUE}
+	${v}=  Get JMS Delivery Mode
     Should Be Equal  PERSISTENT  ${v}
 
 Non-Persistent Delivery Mode
     Set Producer Delivery Mode  NON_PERSISTENT
     ${v}=  Get Producer Delivery Mode
     Should Be Equal  NON_PERSISTENT  ${v}
-	Create Text Message  ${BODY_TEXT}
+	Create Text Message  ${TEXT}
 	Send To Queue  ${QUEUE}
-	Receive From Queue  ${QUEUE}
-	${v}=  Get Delivery Mode
+	Receive Once From Queue  ${QUEUE}
+	${v}=  Get JMS Delivery Mode
     Should Be Equal  NON_PERSISTENT  ${v}
+
+Producer TimeToLive and Message Expiration
+    Create Text Message  ${TEXT}
+    Set Producer Time To Live  20000
+    Send To Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
+    ${v}=  Get JMS Expiration
+    ${e}=  Evaluate  ${v} > 0
+    Should Be True  ${e}
+
+Priority
+    [Setup]  Init Producer
+    Set Producer Priority  7
+    Create Text Message  ${TEXT}
+    Send To Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
+    ${p}=  Get JMS Priority
+    Should Be Equal As Strings  ${p}  7
+
+Producer Initialization
+    Init Producer  NON_PERSISTENT  0  1234
+    ${dm}=  Get Producer Delivery Mode
+    ${p}=  Get Producer Priority
+    ${ttl}=  Get Producer Time To Live
+    Should be Equal  ${dm}  NON_PERSISTENT
+    Should be Equal As Integers  ${p}  0
+    Should be Equal As Integers  ${ttl}  1234

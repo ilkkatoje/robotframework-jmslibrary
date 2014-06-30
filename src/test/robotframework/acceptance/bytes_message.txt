@@ -1,10 +1,11 @@
 *** Settings ***
+Library			BuiltIn
 Library			OperatingSystem
 Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Suite Setup		Connect And Start
 Suite Teardown  Close Connection
-Test Setup      Clear Queue  ${QUEUE}
-Test Tear Down  Clear Queue  ${QUEUE}
+Test Setup      Clear Queue Once  ${QUEUE}
+Test Tear Down  Clear Queue Once  ${QUEUE}
 
 *** Variables ***
 ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
@@ -19,7 +20,7 @@ Send and Receive BytesMessage
     ${s1}=  Get File Size  ${CURDIR}${/}${FILE1}
     Create Bytes Message From File  ${CURDIR}${/}${FILE1}
     Send To Queue  ${QUEUE}
-    Receive From Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
     Write Bytes To File  ${TMP}${/}${FILE1}
     ${s2}=  Get File Size  ${TMP}${/}${FILE1}
     Should Be Equal As Integers  ${s2}  ${s1}
@@ -28,19 +29,47 @@ Send and Receive BytesMessage File Overwrite
     Create Bytes Message From File  ${CURDIR}${/}${FILE1}
     Send To Queue  ${QUEUE}
     Send To Queue  ${QUEUE}
-    Receive From Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
     Write Bytes To File  ${TMP}${/}${FILE1}
     ${s1}=  Get File Size  ${TMP}${/}${FILE1}
-    Receive From Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
     Write Bytes To File  ${TMP}${/}${FILE1}
     ${s2}=  Get File Size  ${TMP}${/}${FILE1}
-    Should Be Equal As Integers  ${s2}  ${s1}  
+    Should Be Equal As Integers  ${s2}  ${s1}
+
+Send and Receive BytesMessage File Append
+    Create Bytes Message From File  ${CURDIR}${/}${FILE1}
+    Send To Queue  ${QUEUE}
+    Send To Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
+    Write Bytes To File  ${TMP}${/}${FILE1}  false
+    ${s1}=  Get File Size  ${TMP}${/}${FILE1}
+    Receive Once From Queue  ${QUEUE}
+    Write Bytes To File  ${TMP}${/}${FILE1}  true
+    ${s2}=  Get File Size  ${TMP}${/}${FILE1}
+    ${d}=  Evaluate  2 * ${s1}
+    Should Be Equal As Integers  ${s2}  ${d}
 
 Send and Receive Bigger BytesMessage
     ${s1}=  Get File Size  ${CURDIR}${/}${FILE2}
     Create Bytes Message From File  ${CURDIR}${/}${FILE2}
     Send To Queue  ${QUEUE}
-    Receive From Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
     Write Bytes To File  ${TMP}${/}${FILE2}
     ${s2}=  Get File Size  ${TMP}${/}${FILE2}
     Should Be Equal As Integers  ${s2}  ${s1}
+
+Binary Message From Text
+    ${s}=  Set Variable  moi\nhei\nä\n
+    Create Bytes Message  ${s}  UTF-8
+    Send To Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
+    ${rs}=  Get Bytes As String  UTF-8
+    Should Be Equal  ${rs}  ${s}
+
+Binary Message Get Bytes As String
+    Create Bytes Message From File  ${CURDIR}${/}file_iso-8859-1.txt
+    Send To Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
+    ${rs}=  Get Bytes As String  ISO-8859-1
+    Should Be Equal  ${rs}  moi\nhei\nä\n

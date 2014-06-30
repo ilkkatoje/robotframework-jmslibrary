@@ -12,81 +12,78 @@ ${TOPIC}                    TOPIC.JMSLIBRARY.TEST
 ${TOPIC_D}                  TOPIC.JMSLIBRARY.DURABLE.TEST
 ${CLIENT_ID}                acceptancetest
 ${SUBSCRIPTION_NAME}        acceptance-subscription
-${BODY_TEXT}                Hello world!
-${PROPERTY_NAME}            cProperty
-${PROPERTY_VALUE}           1234
+${TEXT}                Hello world!
 
 *** Keywords ***
 Setup
     Connect
     Set Client Id  ${CLIENT_ID}
-    Initialize Session
+    Init Session
     Start
 
 *** Test Cases ***
 Topic Subscriber
-    ${pvalue}=  Generate Random String
-    Subscribe  ${TOPIC}
-    Create Text Message  ${BODY_TEXT}
-    Set String Property  ${PROPERTY_NAME}  ${pvalue}
+    [Setup]  Init Topic Consumer  ${TOPIC}
+    ${text}=  Generate Random String
+    Create Text Message  ${text}
     Send To Topic  ${TOPIC}
-    Receive From Topic
-    ${pid}=  Get String Property  ${PROPERTY_NAME}
-    Should be Equal  ${pid}  ${pvalue}
-    Unsubscribe
+    Receive
+    ${body}=  Get Text
+    Should be Equal  ${body}  ${text}
+    [Teardown]  Close Consumer
 
 Topic Subscriber With Receive Timeout
-    ${pvalue}=  Generate Random String
-    Subscribe  ${TOPIC}
-    Create Text Message  ${BODY_TEXT}
-    Set String Property  ${PROPERTY_NAME}  ${pvalue}
+    [Setup]  Init Topic Consumer  ${TOPIC}
+    ${text}=  Generate Random String
+    Create Text Message  ${text}
     Send To Topic  ${TOPIC}
-    Receive From Topic  1000
-    ${pid}=  Get String Property  ${PROPERTY_NAME}
-    Should be Equal  ${pid}  ${pvalue}
-    Unsubscribe
+    Receive  1000
+    ${body}=  Get Text
+    Should be Equal  ${body}  ${text}
+    [Teardown]  Close Consumer
 
-Topic Subscriber Clear 
-    Subscribe  ${TOPIC}
-    Create Text Message  ${BODY_TEXT}  
+Topic Subscriber Clear
+    [Setup]  Init Topic Consumer  ${TOPIC}
+    Create Text Message  ${TEXT}  
     Send To Topic  ${TOPIC}
     Send To Topic  ${TOPIC}
     Send To Topic  ${TOPIC}
-    ${c}=  Clear Topic
+    ${c}=  Clear
     Should be Equal As Integers  ${c}  3
-    Unsubscribe
+    [Teardown]  Close Consumer
 
 Durable Topic Subscriber
-    ${pvalue}=  Generate Random String
-    Subscribe Durable  ${TOPIC_D}   ${SUBSCRIPTION_NAME}
-    Create Text Message  ${BODY_TEXT}
-    Set String Property  ${PROPERTY_NAME}  ${pvalue}
+    Init Durable Subscriber  ${TOPIC_D}   ${SUBSCRIPTION_NAME}
+    ${text}=  Generate Random String
+    Create Text Message  ${text}
     Send To Topic  ${TOPIC_D}
-    Receive From Topic
-    ${pid}=  Get String Property  ${PROPERTY_NAME}
-    Should be Equal  ${pid}  ${pvalue}
-    Unsubscribe Durable  ${SUBSCRIPTION_NAME}
+    Receive
+    ${body}=  Get Text
+    Should be Equal  ${body}  ${text}
+    Close Consumer
+    Unsubscribe  ${SUBSCRIPTION_NAME}
 
 Durable Topic Subscriber with Unsubscribe
-    Subscribe Durable  ${TOPIC_D}   ${SUBSCRIPTION_NAME}
-    Unsubscribe
-    Create Text Message  ${BODY_TEXT}
-    Set String Property  ${PROPERTY_NAME}  ${PROPERTY_VALUE}
+    Init Durable Subscriber  ${TOPIC_D}   ${SUBSCRIPTION_NAME}
+    Close Consumer
+    ${text}=  Generate Random String
+    Create Text Message  ${text}
     Send To Topic  ${TOPIC_D}
-    Subscribe Durable  ${TOPIC_D}   ${SUBSCRIPTION_NAME}
-    Receive From Topic
-    ${pid}=  Get String Property  ${PROPERTY_NAME}
-    Should be Equal  ${pid}  ${PROPERTY_VALUE}
-    Unsubscribe Durable  ${SUBSCRIPTION_NAME}
+    Init Durable Subscriber  ${TOPIC_D}   ${SUBSCRIPTION_NAME}
+    Receive
+    ${body}=  Get Text
+    Should be Equal  ${body}  ${text}
+    Close Consumer
+    Unsubscribe  ${SUBSCRIPTION_NAME}
 
 Durable Topic Subscriber Clear
-    Subscribe Durable  ${TOPIC_D}   ${SUBSCRIPTION_NAME}
-    Create Text Message  ${BODY_TEXT}
-    Set String Property  ${PROPERTY_NAME}  ${PROPERTY_VALUE}
+    Init Durable Subscriber  ${TOPIC_D}   ${SUBSCRIPTION_NAME}
+    Create Text Message  ${TEXT}
     Send To Topic  ${TOPIC_D}
     Send To Topic  ${TOPIC_D}
     Send To Topic  ${TOPIC_D}
     Send To Topic  ${TOPIC_D}
-    ${c}=  Clear Topic
+    ${c}=  Clear
     Should be Equal As Integers  ${c}  4
-    Unsubscribe Durable  ${SUBSCRIPTION_NAME}
+    Close Consumer
+    Unsubscribe  ${SUBSCRIPTION_NAME}

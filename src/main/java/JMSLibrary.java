@@ -11,6 +11,7 @@ import javax.naming.NamingException;
 
 import fi.toje.himmeli.jmslibrary.ProviderConnection;
 import fi.toje.himmeli.jmslibrary.ProviderSession;
+import fi.toje.himmeli.jmslibrary.Options;
 
 /**
  * Robot Framework library for testing JMS applications.
@@ -18,11 +19,7 @@ import fi.toje.himmeli.jmslibrary.ProviderSession;
  * Set the library and JMS provider jars into classpath and start testing.
  * 
  * Library uses one connection which has one session. Session includes one
- * message producer (handles both queues and topics) and one message consumer
- * for topic. Currently, messages can be received only from one topic at time.
- * Queue consumers are created on the fly when receiving. Producer specific
- * settings (timeToLive etc.) apply within a session. Settings will be reset,
- * if session is reinitialized.
+ * message producer and one message consumer.
  * 
  * Default receive timeout is 100 ms.
  * 
@@ -32,39 +29,36 @@ import fi.toje.himmeli.jmslibrary.ProviderSession;
  * | Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
  * | Suite Setup     Connect And Start
  * | Suite Teardown  Close Connection
- * | Test Setup      Clear Queue  ${QUEUE}
- * | Test Tear Down  Clear Queue  ${QUEUE}
- * |
+ * | 
  * | *** Variables ***
  * | ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
  * | ${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
  * | ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
  * | ${TOPIC}                    TOPIC.JMSLIBRARY.TEST
  * | ${TEXT}                     Hello world!
- * |
+ * | 
  * | *** Test Cases ***
  * | Queue Send and Receive TextMessage
+ * |     [Setup]  Clear Queue Once  ${QUEUE}
  * |     Create Text Message  ${TEXT}
  * |     Send To Queue  ${QUEUE}
- * |     Receive From Queue  ${QUEUE}
+ * |     Receive Once From Queue  ${QUEUE}  
  * |     ${body}=  Get Text
  * |     Should Be Equal  ${body}  ${TEXT}
- * |
+ * | 
  * | Topic Send and Receive TextMessage
- * |     Subscribe  ${TOPIC}
+ * |     [Setup]  Init Topic Consumer  ${TOPIC}
  * |     Create Text Message  ${TEXT}
  * |     Send To Topic  ${TOPIC}
- * |     Receive From Topic
+ * |     Receive
  * |     ${body}=  Get Text
  * |     Should Be Equal  ${body}  ${TEXT}
- * |     Unsubscribe
+ * |     [Teardown]  Close Consumer
  */
 public class JMSLibrary {
 
 	public static final String ROBOT_LIBRARY_SCOPE = "TEST SUITE";
 	public static final String ROBOT_LIBRARY_VERSION = "1.0.0-beta.3";
-	public static final String DEFAULT_CONNECTION_FACTORY_LOOKUP_NAME = "ConnectionFactory";
-	public static final String SETTINGS_KW_CONNECTION_FACTORY_LOOKUP_NAME = "connection_factory_name";
 	
 	private InitialContext initialContext;
 	private ConnectionFactory connectionFactory;
@@ -91,9 +85,9 @@ public class JMSLibrary {
 	}
 	
 	private String getConnectionFactoryLookupName(Map<String, String> settings) {
-		String lookupName = DEFAULT_CONNECTION_FACTORY_LOOKUP_NAME;
-		if (settings.containsKey(SETTINGS_KW_CONNECTION_FACTORY_LOOKUP_NAME)) {
-			lookupName = settings.get(SETTINGS_KW_CONNECTION_FACTORY_LOOKUP_NAME);
+		String lookupName = Options.DEFAULT_CONNECTION_FACTORY_LOOKUP_NAME;
+		if (settings.containsKey(Options.SETTINGS_KW_CONNECTION_FACTORY_LOOKUP_NAME)) {
+			lookupName = settings.get(Options.SETTINGS_KW_CONNECTION_FACTORY_LOOKUP_NAME);
 		}
 		
 		return lookupName;
@@ -130,7 +124,7 @@ public class JMSLibrary {
 	 */
 	public void connectAndStart() throws Exception {
 		connect();
-		initializeSession();
+		initSession();
 		start();
 	}
 	
@@ -140,7 +134,7 @@ public class JMSLibrary {
 	 */
 	public void connectAndStart(String username, String password) throws Exception {
 		connect(username, password);
-		initializeSession();
+		initSession();
 		start();
 	}
 	
@@ -149,6 +143,7 @@ public class JMSLibrary {
 	 */
 	public void setClientId(String clientId) throws JMSException {
 		providerConnection.setClientId(clientId);
+		System.out.println("Client id '" + clientId + "' set.");
 	}
 	
 	/**
@@ -159,22 +154,22 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * (Re)initializes session with default attributes (non-transacted,
-	 * AUTO_ACKNOWLEDGE).
+	 * (Re)initializes session with default attributes (false,
+	 * AUTO_ACKNOWLEDGE). Initializes also default producer.
 	 */
-	public void initializeSession() throws Exception {
-		initializeSession(false, ProviderSession.AUTO_ACKNOWLEDGE);
+	public void initSession() throws Exception {
+		initSession(false, Options.AUTO_ACKNOWLEDGE);
 	}
 	
 	/**
-	 * (Re)initializes session.
+	 * (Re)initializes session. Initializes also default producer.
 	 * 
 	 * Arguments:
 	 * - _transacted_: true or false
 	 * - _type_: AUTO_ACKNOWLEDGE, CLIENT_ACKNOWLEDGE, DUPS_OK_ACKNOWLEDGE or SESSION_TRANSACTED
 	 */
-	public void initializeSession(boolean transacted, String type) throws Exception {
-		providerConnection.initSession(transacted, type);
+	public void initSession(boolean transacted, String type) throws Exception {
+		providerConnection.initSession(transacted, Options.convertType(type));
 	}
 	
 	/**
@@ -218,7 +213,8 @@ public class JMSLibrary {
 	
 	/**
 	 * Acknowledges all consumed messages of the session. Used in
-	 * CLIENT_ACKNOWLEDGE mode.
+	 * CLIENT_ACKNOWLEDGE mode. Must be used before the consumer of the received
+	 * message is closed or otherwise acknowledgement won't be sent.
 	 */
 	public void acknowledge() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
@@ -238,7 +234,7 @@ public class JMSLibrary {
 	 * creation.
 	 * 
 	 * Argument:
-	 * - _file_: name of the file
+	 * - _file_: source file name
 	 */
 	public void createBytesMessageFromFile(String file) throws JMSException, IOException {
 		ProviderSession ps = providerConnection.getProviderSession();
@@ -246,11 +242,23 @@ public class JMSLibrary {
 	}
 	
 	/**
+	 * Creates BytesMessage from text.
+	 * 
+	 * Argument:
+	 * - _text_: text which is encoded to bytes
+	 * - _charset_: target character set
+	 */
+	public void createBytesMessage(String text, String charset) throws JMSException, IOException {
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.createBytesMessage(text, charset);
+	}
+	
+	/**
 	 * Sets JMSType of message.
 	 */
 	public void setJMSType(String type) throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
-		ps.setType(type);
+		ps.setJmsType(type);
 	}
 	
 	/**
@@ -262,11 +270,20 @@ public class JMSLibrary {
 	}
 	
 	/**
+	 * Returns JMSPriority of message.
+	 */
+	public int getJMSPriority() throws JMSException {
+		ProviderSession ps = providerConnection.getProviderSession();
+		
+		return ps.getJmsPriority();
+	}
+	
+	/**
 	 * Sets JMSCorrelationID for message.
 	 */
 	public void setJMSCorrelationId(String correlationId) throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
-		ps.setCorrelationId(correlationId);
+		ps.setJmsCorrelationId(correlationId);
 	}
 	
 	/**
@@ -274,7 +291,7 @@ public class JMSLibrary {
 	 */
 	public String getJMSCorrelationId() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
-		return ps.getCorrelationId();
+		return ps.getJmsCorrelationId();
 	}
 	
 	/**
@@ -282,7 +299,7 @@ public class JMSLibrary {
 	 */
 	public void setJMSReplyToQueue(String queue) throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
-		ps.setReplyToQueue(queue);
+		ps.setJmsReplyToQueue(queue);
 	}
 	
 	/**
@@ -293,6 +310,7 @@ public class JMSLibrary {
 	 */
 	public String getJMSReplyToQueue() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
+		
 		return ps.getReplyToQueue();
 	}
 	
@@ -301,7 +319,7 @@ public class JMSLibrary {
 	 */
 	public void setJMSReplyToTopic(String topic) throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
-		ps.setReplyToTopic(topic);
+		ps.setJmsReplyToTopic(topic);
 	}
 	
 	/**
@@ -312,6 +330,7 @@ public class JMSLibrary {
 	 */
 	public String getJMSReplyToTopic() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
+		
 		return ps.getReplyToTopic();
 	}
 	
@@ -323,17 +342,27 @@ public class JMSLibrary {
 	 */
 	public void setProducerTimeToLive(long timeToLive) throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
-		ps.setProducerTimeToLive(timeToLive);
+		ps.getProducer().setTimeToLive(timeToLive);
 	}
 	
 	/**
-	 * JMSExpiration of received message.
+	 * Gets time to live of the producer.
+	 * 
+	 */
+	public long getProducerTimeToLive() throws JMSException {
+		ProviderSession ps = providerConnection.getProviderSession();
+		
+		return ps.getProducer().getTimeToLive();
+	}
+	
+	/**
+	 * JMSExpiration of message.
 	 * 
 	 * Returns expiration of message
 	 */
 	public long getJMSExpiration() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
-		return ps.getExpiration();
+		return ps.getJmsExpiration();
 	}
 	
 	/**
@@ -344,7 +373,27 @@ public class JMSLibrary {
 	 */
 	public void setProducerDeliveryMode(String deliveryMode) throws Exception {
 		ProviderSession ps = providerConnection.getProviderSession();
-		ps.setProducerDeliveryMode(deliveryMode);
+		ps.getProducer().setDeliveryMode(Options.convertDeliveryMode(deliveryMode));
+	}
+	
+	/**
+	 * Returns priority of the producer.
+	 */
+	public int getProducerPriority() throws Exception {
+		ProviderSession ps = providerConnection.getProviderSession();
+		
+		return ps.getProducer().getPriority();
+	}
+	
+	/**
+	 * Sets priority for the producer.
+	 * 
+	 * Argument:
+	 * - _priority_: 0-9
+	 */
+	public void setProducerPriority(int priority) throws Exception {
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.getProducer().setPriority(priority);
 	}
 	
 	/**
@@ -352,15 +401,17 @@ public class JMSLibrary {
 	 */
 	public String getProducerDeliveryMode() throws Exception {
 		ProviderSession ps = providerConnection.getProviderSession();
-		return ps.getProducerDeliveryMode();
+		
+		return Options.convertDeliveryMode(ps.getProducerDeliveryMode());
 	}
 	
 	/**
-	 * Returns delivery mode of received message: PERSISTENT or NON_PERSISTENT.
+	 * Returns delivery mode of message: PERSISTENT or NON_PERSISTENT.
 	 */
-	public String getDeliveryMode() throws Exception {
+	public String getJMSDeliveryMode() throws Exception {
 		ProviderSession ps = providerConnection.getProviderSession();
-		return ps.getDeliveryMode();
+		
+		return Options.convertDeliveryMode(ps.getJmsDeliveryMode());
 	}
 	
 	/**
@@ -370,6 +421,7 @@ public class JMSLibrary {
 	 */
 	public boolean getJMSRedelivered() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
+		
 		return ps.getJmsRedelivered();
 	}
 	
@@ -397,16 +449,41 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * JMSMessageID
+	 * JMSMessageID of the message.
 	 * 
 	 * Returns message id.
 	 */
 	public String getJMSMessageId() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
-		String id = ps.getMessageId();
+		String id = ps.getJmsMessageId();
 		System.out.println("MessageId=" + id);
 		
 		return id;
+	}
+	
+	/**
+	 * Receives using the consumer. The message is set to internal message
+	 * object and its body and properties can be accessed via methods.
+	 * 
+	 * `Init Queue Consumer`, `Init Topic Consumer` or `Init Durable Subscriber`
+	 * must have been called before this.
+	 * 
+	 * Fails if message is not available.
+	 */
+	public void receive() throws Exception {
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.receive();
+	}
+	
+	/**
+	 * Similar as plain Receive but with additional timeout argument.
+	 * 
+	 * Argument:
+	 * - _timeout_: receive timeout in milliseconds
+	 */
+	public void receive(long timeout) throws Exception {
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.receive(timeout);
 	}
 	
 	/**
@@ -420,29 +497,30 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Receives message from queue. The message is set to internal message
-	 * object and its body and properties can be accessed via methods.
+	 * Receives message from queue. Local MessageConsumer is created on the fly
+	 * and closed after receiving. Acknowledges or commits depending on the
+	 * session configuration. This can be called without preceding `Init
+	 * Queue Consumer` keyword and there is no need to close the consumer with
+	 * `Close Consumer` keyword. The message is set to internal message object
+	 * and its body and properties can be accessed via methods.
 	 * 
 	 * Fails if message is not available.
 	 */
-	public void receiveFromQueue(String queue) throws Exception {
+	public void receiveOnceFromQueue(String queue) throws Exception {
 		ProviderSession ps = providerConnection.getProviderSession();
-		ps.receiveFromQueue(queue);
+		ps.receiveOnceFromQueue(queue);
 	}
 	
 	/**
-	 * Receives message from queue. The message is set to internal message
-	 * object and its body and properties can be accessed via methods.
-	 * 
-	 * Fails if message is not available.
+	 * Similar as Receive Once From Queue but with additional timeout argument.
 	 * 
 	 * Arguments:
 	 * - _queue_: name of the queue
 	 * - _timeout_: receive timeout in milliseconds
 	 */
-	public void receiveFromQueue(String queue, long timeout) throws Exception {
+	public void receiveOnceFromQueue(String queue, long timeout) throws Exception {
 		ProviderSession ps = providerConnection.getProviderSession();
-		ps.receiveFromQueue(queue, timeout);
+		ps.receiveOnceFromQueue(queue, timeout);
 	}
 	
 	/**
@@ -456,66 +534,101 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Subscribes to topic. Receive From Topic can be called after.
+	 * (Re)initializes the consumer as queue receiver. Previous consumer is
+	 * closed before. Receive can be called after.
+	 * 
+	 * Argument:
+	 * - _queue_: name of the queue
 	 */
-	public void subscribe(String topic) throws JMSException {
-		ProviderSession ps = providerConnection.getProviderSession();
-		ps.subscribe(topic);
+	public void initQueueConsumer(String queue) throws JMSException {
+		initQueueConsumer(queue, false);
 	}
 	
 	/**
-	 * Unsubscribes from topic and closes topic consumer. This can be used also
-	 * after Subscribe Durable (Durable subscription will still remain).
+	 * (Re)initializes the consumer as queue receiver. Previous consumer is
+	 * closed before. Receive can be called after.
+	 * 
+	 * Arguments:
+	 * - _queue_: name of the queue
+	 * - _clear_: true, clears the destination after initialization.
 	 */
-	public void unsubscribe() throws JMSException {
+	public void initQueueConsumer(String queue, boolean clear) throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
-		ps.unsubscribe();
+		ps.initializeQueueConsumer(queue);
+		if (clear) {
+			int c = ps.clear();
+			System.out.println("Consumer initialized for " + queue + " and " + c 
+					+ " messages consumed.");
+		}
+		else {
+			System.out.println("Consumer initialized for " + queue + ".");
+		}
 	}
 	
 	/**
-	 * Subscribes durably to topic. Receive From Topic can be called after.
+	 * (Re)initializes the consumer as topic subscriber. Previous consumer is
+	 * closed before. Receive can be called after.
+	 * 
+	 * Argument:
+	 * - _topic_: name of the topic
+	 */
+	public void initTopicConsumer(String topic) throws JMSException {
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.initializeTopicConsumer(topic);
+		System.out.println("Consumer initialized for " + topic + ".");
+	}
+	
+	/**
+	 * Closes the consumer. Possible durable subscription will still remain.
+	 */
+	public void closeConsumer() throws JMSException {
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.closeConsumer();
+	}
+	
+	/**
+	 * (Re)initializes the consumer as durable topic subscriber. Previous
+	 * consumer is closed before. Receive can be called after.
 	 * 
 	 * Arguments:
 	 * - _topic_: topic name
 	 * - _name_: subscription name
 	 */
-	public void subscribeDurable(String topic, String name) throws JMSException {
+	public void initDurableSubscriber(String topic, String name) throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
-		ps.subscribeDurable(topic, name);
+		ps.initializeDurableSubscriber(topic, name);
 	}
 	
 	/**
-	 * Unsubscribes from topic and closes topic consumer.
+	 * Unsubscribes a durable subscription.
 	 * 
 	 * Argument:
 	 * - _name_: subscription name
 	 */
-	public void unsubscribeDurable(String name) throws JMSException {
+	public void unsubscribe(String name) throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
-		ps.unsubscribeDurable(name);
+		ps.unsubscribe(name);
 	}
 	
 	/**
-	 * Subscribe (Subscribe Durable) must have been called before this.
-	 * 
-	 * Fails if message is not available.
+	 * (Re)initializes producer with default settings, refer JMS specs.
 	 */
-	public void receiveFromTopic() throws Exception {
+	public void initProducer() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
-		ps.receiveFromTopic();
+		ps.initProducer();
 	}
 	
 	/**
-	 * Subscribe (Subscribe Durable) must have been called before this.
+	 * (Re)initializes producer with the arguments.
 	 * 
-	 * Fails if message is not available.
-	 * 
-	 * Argument:
-	 * - _timeout_: receive timeout in milliseconds
+	 * Arguments:
+	 * - _deliveryMode_: PERSISTENT or NON_PERSISTENT
+	 * - _priority_: 0-9
+	 * - _timeToLive_: milliseconds
 	 */
-	public void receiveFromTopic(long timeout) throws Exception {
+	public void initProducer(String deliveryMode, int priority, long timeToLive) throws NumberFormatException, Exception {
 		ProviderSession ps = providerConnection.getProviderSession();
-		ps.receiveFromTopic(timeout);
+		ps.initProducer(Options.convertDeliveryMode(deliveryMode), priority, timeToLive);
 	}
 	
 	/**
@@ -528,11 +641,38 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Writes body of BytesMessage into file.
+	 * Returns the body of BytesMessage as String.
+	 * 
+	 * Argument:
+	 * - _charset_: character set of the binary body
+	 */
+	public String getBytesAsString(String charset) throws Exception {
+		ProviderSession ps = providerConnection.getProviderSession();
+		
+		return ps.getBytesAsString(charset);
+	}
+	
+	/**
+	 * Writes body of BytesMessage into file. Overwrites if the file exists.
+	 * 
+	 * Arguments:
+	 * - _file_: target file name
 	 */
 	public void writeBytesToFile(String file) throws JMSException, IOException {
 		ProviderSession ps = providerConnection.getProviderSession();
-		ps.writeBytes(file);
+		ps.writeBytes(file, false);
+	}
+	
+	/**
+	 * Writes body of BytesMessage into file.
+	 * 
+	 * Arguments:
+	 * - _file_: target file name
+	 * - _append_: true or false
+	 */
+	public void writeBytesToFile(String file, boolean append) throws JMSException, IOException {
+		ProviderSession ps = providerConnection.getProviderSession();
+		ps.writeBytes(file, append);
 	}
 	
 	/**
@@ -548,29 +688,39 @@ public class JMSLibrary {
 	
 	/**
 	 * Clears the queue by reading all available messages. Acknowledges or
-	 * commits depending on the configuration.
+	 * commits depending on the session configuration.
 	 * 
-	 * Returns message count that was consumed from the queue
+	 * Local MessageConsumer is created on the fly and closed after receiving.
+	 * No need to call `Init Queue Consumer` before.
+	 * 
+	 * Note that all the messages might not be consumed if there is a consumer
+	 * initialized for the same queue. This is because there might be a prefetch
+	 * option at the provider.
+	 * 
+	 * Returns message count that was consumed from the queue.
 	 */
-	public int clearQueue(String queue) throws Exception {
+	public int clearQueueOnce(String queue) throws Exception {
 		ProviderSession ps = providerConnection.getProviderSession();
 		int count = ps.clearQueue(queue);
-		System.out.println(queue + " cleared. " + count + " messages consumed.");
+		System.out.println(count + " messages consumed from " + queue + ".");
 		
 		return count;
 	}
 	
 	/**
-	 * Clears the topic by reading all available messages. Acknowledges or
-	 * commits depending on the configuration. Subscription must have been done
-	 * before.
+	 * Clears the destination of the consumer by reading all
+	 * available messages. Acknowledges or commits depending on the
+	 * session configuration.
 	 * 
-	 * Returns message count that was consumed from the topic.
+	 * `Init Queue Consumer`, `Init Topic Consumer` or `Init Durable Subscriber`
+	 * must have been called before.
+	 * 
+	 * Returns message count that was consumed.
 	 */
-	public int clearTopic() throws JMSException {
+	public int clear() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
-		int count = ps.clearTopic();
-		System.out.println("Topic cleared. " + count + " messages consumed.");
+		int count = ps.clear();
+		System.out.println(count + " consumed. ");
 		
 		return count;
 	}

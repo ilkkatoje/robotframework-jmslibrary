@@ -2,7 +2,6 @@ package fi.toje.himmeli.jmslibrary;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
-import javax.jms.Session;
 
 public class ProviderConnection {
 	
@@ -52,25 +51,8 @@ public class ProviderConnection {
 		connection.close();
 	}
 	
-	public void closeSession() throws JMSException {
-		if (providerSession != null) {
-			providerSession.close();
-		}
-	}
-	
-	/**
-	 * @return connection
-	 */
-	public Connection getConnection() {
-		return connection;
-	}
-	
 	public ProviderSession getProviderSession() {
 		return providerSession;
-	}
-	
-	public Session getSession() {
-		return providerSession.getSession();
 	}
 	
 	/**
@@ -82,10 +64,10 @@ public class ProviderConnection {
 	 * SESSION_TRANSACTED
 	 * @throws JMSException
 	 */
-	public void initSession(boolean transacted, String type) throws Exception {
+	public void initSession(boolean transacted, int type) throws Exception {
 		if (providerSession != null) {
 			providerSession.close();
 		}
-		providerSession = new ProviderSession(connection.createSession(transacted, ProviderSession.convertType(type)));
+		providerSession = new ProviderSession(connection.createSession(transacted, type));
 	}
 }

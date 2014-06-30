@@ -1,10 +1,11 @@
 *** Settings ***
 Library			OperatingSystem
+Library         String
 Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Suite Setup		Connect And Start
 Suite Teardown  Close Connection
-Test Setup      Clear Queue  ${QUEUE}
-Test Tear Down  Clear Queue  ${QUEUE}
+Test Setup      Clear Queue Once  ${QUEUE}
+Test Tear Down  Clear Queue Once  ${QUEUE}
 
 *** Variables ***
 ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
@@ -12,122 +13,49 @@ ${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
 ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
 ${REPLY2QUEUE}              QUEUE.JMSLIBRARY.TEST.REPLY
 ${TOPIC}                    TOPIC.JMSLIBRARY.TEST
-${SUBSCRIBER}               acceptancetest
-${BODY_TEXT}                Hello world!
+${TEXT}                Hello world!
 
 *** Test Cases ***
 Send and Clear
-    ${c}=  Clear Queue  ${QUEUE}
+    ${c}=  Clear Queue Once  ${QUEUE}
     Should Be Equal As Integers  0  ${c}
-    Create Text Message  ${BODY_TEXT}
+    Create Text Message  ${TEXT}
     Send To Queue  ${QUEUE}
-    Create Text Message  ${BODY_TEXT}
+    Create Text Message  ${TEXT}
     Send To Queue  ${QUEUE}
-    Create Text Message  ${BODY_TEXT}
+    Create Text Message  ${TEXT}
     Send To Queue  ${QUEUE}
-    ${c}=  Clear Queue  ${QUEUE}
+    ${c}=  Clear Queue Once  ${QUEUE}
     Should Be Equal As Integers  3  ${c}
 
 Queue Depth
-    Create Text Message  ${BODY_TEXT}
+    Create Text Message  ${TEXT}
     Send To Queue  ${QUEUE}
-    Create Text Message  ${BODY_TEXT}
+    Create Text Message  ${TEXT}
     Send To Queue  ${QUEUE}
     ${c}=  Queue Depth  ${QUEUE}
     Should Be Equal As Integers  2  ${c}
 
 Double Send
-    Create Text Message  ${BODY_TEXT}
+    Create Text Message  ${TEXT}
     Send To Queue  ${QUEUE}
     ${v1}=  Get JMS Message Id
     Send To Queue  ${QUEUE}
     ${v2}=  Get JMS Message Id
     Should Not Be Equal  ${v1}  ${v2}
 
-Send and Receive TextMessage
-    Create Text Message  ${BODY_TEXT}
+Send and Receive Once TextMessage
+    ${text}=  Generate Random String
+    Create Text Message  ${text}
     Send To Queue  ${QUEUE}
-    Receive From Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
     ${body}=  Get Text
-    Should Be Equal  ${BODY_TEXT}  ${body}
+    Should Be Equal  ${body}  ${text}
 
-Send and Receive TextMessage With Timeout
-    Create Text Message  ${BODY_TEXT}
+Send and Receive Once TextMessage With Timeout
+    ${text}=  Generate Random String
+    Create Text Message  ${text}
     Send To Queue  ${QUEUE}
-    Receive From Queue  ${QUEUE}  1000
+    Receive Once From Queue  ${QUEUE}  1000
     ${body}=  Get Text
-    Should Be Equal  ${BODY_TEXT}  ${body}
-
-Send and Receive TextMessage with Property
-    ${property}  Set Variable  the_value
-    Create Text Message  ${BODY_TEXT}
-    Set String Property  ownProp  ${property}
-    Send To Queue  ${QUEUE}
-    Receive From Queue  ${QUEUE}
-    ${receivedProperty}=  Get String Property  ownProp
-    Should Be Equal As Strings  ${receivedProperty}  ${property}
-
-JMS Message Id
-    Create Text Message  ${BODY_TEXT}
-    ${id}=  Get JMS Message Id
-    Should Be Equal As Strings  None  ${id}
-    Send To Queue  ${QUEUE}
-    ${id}=  Get JMS Message Id
-    Should Start With  ${id}  ID:
-
-Set JMS Type
-    Create Text Message  ${BODY_TEXT}
-    Set JMS Type  txt
-    Send To Queue  ${QUEUE}
-    Receive From Queue  ${QUEUE}
-    ${type}=  Get JMS Type
-    Should Be Equal As Strings  ${type}  txt
-
-JMS Correlation Id
-    Create Text Message  ${BODY_TEXT}
-    Set JMS Correlation Id  123
-    Send To Queue  ${QUEUE}
-    Receive From Queue  ${QUEUE}
-    ${cid}=  Get JMS Correlation Id
-    Should Be Equal As Strings  ${cid}  123
-
-JMS Reply To Queue with Queue
-    Create Text Message  ${BODY_TEXT}
-    Set JMS Reply To Queue  ${REPLY2QUEUE}
-    Send To Queue  ${QUEUE}
-    Receive From Queue  ${QUEUE}
-    ${r}=  Get JMS Reply To Queue
-    Should Be Equal As Strings  ${r}  ${REPLY2QUEUE}
-
-JMS Reply To Queue with Topic
-    Create Text Message  ${BODY_TEXT}
-    Set JMS Reply To Topic  ${TOPIC}
-    Send To Queue  ${QUEUE}
-    Receive From Queue  ${QUEUE}
-    ${q}=  Get JMS Reply To Queue
-    Should Be Equal As Strings  ${q}  None
-
-JMS Reply To Topic with Topic
-    Create Text Message  ${BODY_TEXT}
-    Set JMS Reply To Topic  ${TOPIC}
-    Send To Queue  ${QUEUE}
-    Receive From Queue  ${QUEUE}
-    ${t}=  Get JMS Reply To Topic
-    Should Be Equal As Strings  ${t}  ${TOPIC}
-
-JMS Reply To Topic with Queue
-    Create Text Message  ${BODY_TEXT}
-    Set JMS Reply To Queue  ${REPLY2QUEUE}
-    Send To Queue  ${QUEUE}
-    Receive From Queue  ${QUEUE}
-    ${t}=  Get JMS Reply To Topic
-    Should Be Equal As Strings  ${t}  None
-
-Producer TimeToLive and Message Expiration
-    Create Text Message  ${BODY_TEXT}
-    Set Producer Time To Live  20000
-    Send To Queue  ${QUEUE}
-    Receive From Queue  ${QUEUE}
-    ${v}=  Get JMS Expiration
-    ${e}=  Evaluate  ${v} > 0
-    Should Be True  ${e}
+    Should Be Equal  ${body}  ${text}

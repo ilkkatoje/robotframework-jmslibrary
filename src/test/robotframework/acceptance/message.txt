@@ -1,0 +1,84 @@
+*** Settings ***
+Library			OperatingSystem
+Library         String
+Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
+Suite Setup		Connect And Start
+Suite Teardown  Close Connection
+Test Setup      Clear Queue Once  ${QUEUE}
+Test Tear Down  Clear Queue Once  ${QUEUE}
+
+*** Variables ***
+${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
+${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
+${QUEUE}                    QUEUE.JMSLIBRARY.TEST
+${REPLY2QUEUE}              QUEUE.JMSLIBRARY.TEST.REPLY
+${TOPIC}                    TOPIC.JMSLIBRARY.TEST
+${TEXT}                Hello world!
+
+*** Test Cases ***
+Send and Receive TextMessage with Property
+    ${value}=  Generate Random String
+    Create Text Message  ${TEXT}
+    Set String Property  own_prop  ${value}
+    Send To Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
+    ${received_property}=  Get String Property  own_prop
+    Should Be Equal As Strings  ${received_property}  ${value}
+
+JMS Message Id
+    Create Text Message  ${TEXT}
+    ${id}=  Get JMS Message Id
+    Should Be Equal As Strings  None  ${id}
+    Send To Queue  ${QUEUE}
+    ${id}=  Get JMS Message Id
+    Should Start With  ${id}  ID:
+
+Set JMS Type
+    ${value}=  Generate Random String
+    Create Text Message  ${TEXT}
+    Set JMS Type  ${value}  
+    Send To Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
+    ${type}=  Get JMS Type
+    Should Be Equal As Strings  ${type}  ${value}
+
+JMS Correlation Id
+    ${value}=  Generate Random String
+    Create Text Message  ${TEXT}
+    Set JMS Correlation Id  ${value}
+    Send To Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
+    ${cid}=  Get JMS Correlation Id
+    Should Be Equal As Strings  ${cid}  ${value}
+
+JMS Reply To Queue with Queue
+    Create Text Message  ${TEXT}
+    Set JMS Reply To Queue  ${REPLY2QUEUE}
+    Send To Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
+    ${r}=  Get JMS Reply To Queue
+    Should Be Equal As Strings  ${r}  ${REPLY2QUEUE}
+
+JMS Reply To Queue with Topic
+    Create Text Message  ${TEXT}
+    Set JMS Reply To Topic  ${TOPIC}
+    Send To Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
+    ${q}=  Get JMS Reply To Queue
+    Should Be Equal As Strings  ${q}  None
+
+JMS Reply To Topic with Topic
+    Create Text Message  ${TEXT}
+    Set JMS Reply To Topic  ${TOPIC}
+    Send To Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
+    ${t}=  Get JMS Reply To Topic
+    Should Be Equal As Strings  ${t}  ${TOPIC}
+
+JMS Reply To Topic with Queue
+    Create Text Message  ${TEXT}
+    Set JMS Reply To Queue  ${REPLY2QUEUE}
+    Send To Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
+    ${t}=  Get JMS Reply To Topic
+    Should Be Equal As Strings  ${t}  None

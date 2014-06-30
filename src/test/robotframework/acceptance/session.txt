@@ -1,54 +1,81 @@
 *** Settings ***
 Documentation   Test suite which deals with settings related to session scope, hence modifications at some test case can have side effects at another one. Be careful.
+Library         BuiltIn
 Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Suite Setup		Connect And Start
 Suite Teardown	Close Connection
-Test Setup      Clear Queue  ${QUEUE}
-Test Tear Down  Clear Queue  ${QUEUE}
+Test Setup      Clear Queue Once  ${QUEUE}
+Test Teardown   Clear Queue Once  ${QUEUE}
 
 *** Variables ***
 ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
 ${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
 ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
-${BODY_TEXT}                Hello world!
+${TEXT}                Hello world!
 
 *** Test Cases ***
 Send Client Acknowledged
-    Initialize Session  false  2
-    Create Text Message  ${BODY_TEXT}
+    Init Session  false  2
+    Create Text Message  ${TEXT}
     Send To Queue  ${QUEUE}
-    Receive From Queue  ${QUEUE}
+    Init Queue Consumer  ${QUEUE}
+    Receive
+    Close Consumer
+    Init Queue Consumer  ${QUEUE}
+    Receive
     Acknowledge
     ${r}=  Get JMS Redelivered
+    Should Be True  ${r}
+    ${qd}=  Queue Depth  ${QUEUE}
+    Should Be Equal As Integers  ${qd}  0
 
 Transaction
-    Initialize Session  true  0
-    Create Text Message  ${BODY_TEXT}
+    Init Session  true  0
+    Create Text Message  ${TEXT}
+    Send To Queue  ${QUEUE}
+    Rollback
     Send To Queue  ${QUEUE}
     Commit
-    Receive From Queue  ${QUEUE}
-    Rollback
-    Receive From Queue  ${QUEUE}
+    Receive Once From Queue  ${QUEUE}
+    ${c}=  Clear Queue Once  ${QUEUE}
+    Should Be Equal As Integers  ${c}  0
+
+Transaction With Two Receives
+    [Setup]  Run Keywords  Init Session  true  SESSION_TRANSACTED  AND  Clear Queue Once  ${QUEUE}
+    Init Queue Consumer  ${QUEUE}
+    Create Text Message  ${TEXT}
+    Send To Queue  ${QUEUE}
+    Send To Queue  ${QUEUE}
     Commit
-    ${c}=  Clear Queue  ${QUEUE}
-    Should Be Equal As Integers  0  ${c}
+    Receive
+    Receive
+    Rollback
+    Receive  1000
+    Receive
+    Run Keyword And Expect Error  *  Receive
+    Commit
+    [Teardown]  Run Keywords  Close Consumer  AND  Clear Queue Once  ${QUEUE}
 
 Not JMS Redelivered
-    Initialize Session  false  CLIENT_ACKNOWLEDGE
-    Create Text Message  ${BODY_TEXT}
+    [Setup]  Init Session  false  CLIENT_ACKNOWLEDGE
+    Init Queue Consumer  ${QUEUE}
+    Create Text Message  ${TEXT}
     Send To Queue  ${QUEUE}
-    Receive From Queue  ${QUEUE}
-    ${t}=  Get JMS Redelivered
-    Should Not Be True  ${t}
+    Receive
+    ${v}=  Get JMS Redelivered
+    Should Not Be True  ${v}
     Acknowledge
+    [Teardown]  Close Consumer
 
 JMS Redelivered              
-    Initialize Session  false  CLIENT_ACKNOWLEDGE
-    Create Text Message  ${BODY_TEXT}
+    Init Session  false  CLIENT_ACKNOWLEDGE
+    Create Text Message  ${TEXT}
     Send To Queue  ${QUEUE}
-    Receive From Queue  ${QUEUE}
-    Initialize Session  false  CLIENT_ACKNOWLEDGE
-    Receive From Queue  ${QUEUE}
+    Init Queue Consumer  ${QUEUE}
+    Receive
+    Init Session  false  CLIENT_ACKNOWLEDGE
+    Init Queue Consumer  ${QUEUE}
+    Receive
     Acknowledge
     ${t}=  Get JMS Redelivered
     Should Be True  ${t}
