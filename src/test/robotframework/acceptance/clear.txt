@@ -1,0 +1,103 @@
+*** Settings ***
+Library         BuiltIn
+Library         String
+Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
+Suite Setup     Connect And Start
+Suite Teardown  Close Connection
+
+*** Variables ***
+${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
+${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
+${QUEUE}                   QUEUE.JMSLIBRARY.TEST
+
+*** Test Cases ***
+Clear With Transactions
+    [Setup]  Init Test Session  true  SESSION_TRANSACTED
+    ${text1}=  Generate Random String
+    Create Text Message  ${text1}
+    Send To Queue  ${QUEUE}
+    Send To Queue  ${QUEUE}
+    Commit
+    ${c}=  Clear
+    Commit
+    Should be Equal As Integers  ${c}  2
+    ${c}=  Clear
+    Commit
+    Should be Equal As Integers  ${c}  0
+    [Teardown]  Close Consumer
+
+Clear With Transactions And Rollback
+    [Setup]  Init Test Session  true  SESSION_TRANSACTED
+    ${text1}=  Generate Random String
+    Create Text Message  ${text1}
+    Send To Queue  ${QUEUE}
+    Send To Queue  ${QUEUE}
+    Commit
+    ${c}=  Clear
+    Rollback
+    Sleep  1  s  # transaction takes time
+    Should be Equal As Integers  ${c}  2
+    ${c}=  Clear
+    Commit
+    Should be Equal As Integers  ${c}  2
+    [Teardown]  Close Consumer
+
+Clear With Acknowledgements Part 1
+    [Setup]  Init Test Session  false  CLIENT_ACKNOWLEDGE
+    ${text1}=  Generate Random String
+    Create Text Message  ${text1}
+    Send To Queue  ${QUEUE}
+    Send To Queue  ${QUEUE}
+    ${c}=  Clear
+    Should be Equal As Integers  ${c}  2
+    # no acknowledgement
+    [Teardown]  Close Consumer
+
+Clear With Acknowledgements Part 2
+    [Setup]  Init Queue Consumer  ${QUEUE}
+    ${c}=  Clear
+    Should be Equal As Integers  ${c}  2
+    Acknowledge
+    [Teardown]  Close Consumer
+
+Clear With Acknowledgements Part 3
+    [Setup]  Init Queue Consumer  ${QUEUE}
+    ${c}=  Clear
+    Acknowledge
+    Should be Equal As Integers  ${c}  0
+    Create Text Message  hei3
+    Send To Queue  ${QUEUE}
+    Clear
+    Create Text Message  hei4
+    Send To Queue  ${QUEUE}
+    Clear
+    Acknowledge
+    Clear
+    [Teardown]  Close Consumer
+
+Sessions
+    [Setup]  Init Session  true  SESSION_TRANSACTED
+    Clear Queue Once  queue
+    Create Text Message  terve
+    Send To Queue  queue
+    Create Text Message  terve2
+    Send To Queue  queue
+    Commit
+    Init Queue Consumer  queue
+    Receive
+    Close Consumer
+    Rollback
+    Queue Depth  queue
+    Init Queue Consumer  queue
+    Receive
+    Close Consumer
+    Commit
+    Clear Queue Once  queue
+
+*** Keywords ***
+
+Init Test Session
+    [Arguments]  ${transacted}  ${mode}
+    Init Session  ${transacted}  ${mode}
+    Clear Queue Once  ${QUEUE}
+    Init Queue Consumer  ${QUEUE}
