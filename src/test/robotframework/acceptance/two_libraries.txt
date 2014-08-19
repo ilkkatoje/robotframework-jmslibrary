@@ -32,6 +32,27 @@ Topic Send and Receive TextMessage
     Should Be Equal  ${body}  ${text}
     [Teardown]  jms2.Close Consumer
 
+Clear With Transactions
+	jms1.Init Session  true  SESSION_TRANSACTED
+    jms2.Init Session  true  SESSION_TRANSACTED
+    jms2.Init Queue Consumer  ${QUEUE}
+    ${text1}=  Generate Random String
+    jms1.Create Text Message  ${text1}
+    jms1.Send To Queue  ${QUEUE}
+    jms1.Send To Queue  ${QUEUE}
+    jms1.Commit
+    ${c}=  jms2.Clear
+    Should be Equal As Integers  ${c}  2
+    jms1.Send To Queue  ${QUEUE}
+    jms1.Commit
+    ${c}=  jms2.Clear
+    jms2.Commit
+    Should be Equal As Integers  ${c}  1
+    ${c}=  jms2.Clear
+    jms2.Commit
+    Should be Equal As Integers  ${c}  0
+
+
 *** Keywords ***
 Initialize Suite
     jms1.Connect And Start

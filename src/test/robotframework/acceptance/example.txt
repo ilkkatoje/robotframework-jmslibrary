@@ -11,19 +11,28 @@ ${TOPIC}                    TOPIC.JMSLIBRARY.TEST
 ${TEXT}                     Hello world!
 
 *** Test Cases ***
-Queue Send and Receive TextMessage
+Send And Receive Once TextMessage With Queue
     [Setup]  Clear Queue Once  ${QUEUE}
     Create Text Message  ${TEXT}
     Send To Queue  ${QUEUE}
-    Receive Once From Queue  ${QUEUE}  
+    Receive Once From Queue  ${QUEUE}
     ${body}=  Get Text
     Should Be Equal  ${body}  ${TEXT}
 
-Topic Send and Receive TextMessage
+Send And Receive BytesMessage With Queue
+    [Setup]  Run Keywords  Init Queue Consumer  ${QUEUE}  AND  Clear
+    Create Bytes Message  ${TEXT}  UTF-8
+    Send To Queue  ${QUEUE}
+    Receive
+    ${body}=  Get Bytes As String  UTF-8
+    Should Be Equal  ${body}  ${TEXT}
+    [Teardown]  Close Consumer
+
+Send and Receive BytesMessage With Topic
     [Setup]  Init Topic Consumer  ${TOPIC}
-    Create Text Message  ${TEXT}
+    Create Bytes Message  ${TEXT}  UTF-8
     Send To Topic  ${TOPIC}
     Receive
-    ${body}=  Get Text
+    ${body}=  Get Bytes As String  UTF-8
     Should Be Equal  ${body}  ${TEXT}
     [Teardown]  Close Consumer

@@ -1,6 +1,7 @@
 *** Settings ***
 Documentation   Test suite which deals with settings related to session scope, hence modifications at some test case can have side effects at another one. Be careful.
 Library         BuiltIn
+Library         String
 Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
 Suite Setup		Connect And Start
 Suite Teardown	Close Connection
@@ -11,12 +12,14 @@ Test Teardown   Clear Queue Once  ${QUEUE}
 ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
 ${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
 ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
-${TEXT}                Hello world!
+${QUEUE2}                   QUEUE.JMSLIBRARY.TEST.2
+${TEXT}                     Hello world!
 
 *** Test Cases ***
 Send Client Acknowledged
     Init Session  false  2
-    Create Text Message  ${TEXT}
+    ${text1}=  Generate Random String
+    Create Text Message  ${text1}
     Send To Queue  ${QUEUE}
     Init Queue Consumer  ${QUEUE}
     Receive
@@ -24,7 +27,9 @@ Send Client Acknowledged
     Init Queue Consumer  ${QUEUE}
     Receive
     Acknowledge
+    ${t}=  Get Text
     ${r}=  Get JMS Redelivered
+    Should Be Equal As Strings  ${t}  ${text1}
     Should Be True  ${r}
     ${qd}=  Queue Depth  ${QUEUE}
     Should Be Equal As Integers  ${qd}  0
@@ -56,6 +61,25 @@ Transaction With Two Receives
     Commit
     [Teardown]  Run Keywords  Close Consumer  AND  Clear Queue Once  ${QUEUE}
 
+Commit After Closing Consumers
+    [Setup]  Run Keywords  Clear Queue Once  ${QUEUE}  AND  Clear Queue Once  ${QUEUE2}  
+    Init Session  true  SESSION_TRANSACTED
+    Init Queue Consumer  ${QUEUE}
+    Create Text Message  ${TEXT}
+    Send To Queue  ${QUEUE}
+    Send To Queue  ${QUEUE2}
+    Commit
+    Init Queue Consumer  ${QUEUE}
+    Receive
+    Init Queue Consumer  ${QUEUE2}
+    Receive
+    Close Consumer
+    Commit
+    ${c1}=  Clear Queue Once  ${QUEUE}
+    ${c2}=  Clear Queue Once  ${QUEUE2}
+    Should Be Equal As Integers  ${c1}  0
+    Should Be Equal As Integers  ${c2}  0
+    
 Not JMS Redelivered
     [Setup]  Init Session  false  CLIENT_ACKNOWLEDGE
     Init Queue Consumer  ${QUEUE}

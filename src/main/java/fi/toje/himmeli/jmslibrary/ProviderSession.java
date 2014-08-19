@@ -31,6 +31,7 @@ public class ProviderSession {
 	private HashMap<String, Queue> queues;
 	private HashMap<String, Topic> topics;
 	private Message message;
+	private Message lastReceivedMessage;
 	
 	public ProviderSession(Session session) throws JMSException {
 		this.session = session;
@@ -272,8 +273,10 @@ public class ProviderSession {
 	
 	public void receive(long timeout) throws Exception {
 		message = null;
+		lastReceivedMessage = null;
 		if (consumer != null) {
 			message = consumer.receive(timeout);
+			lastReceivedMessage = message;
 			if (message == null) {
 				throw new Exception("No message available.");
 			}
@@ -420,9 +423,16 @@ public class ProviderSession {
 	 */
 	public void receiveFromTopic(long timeout) throws Exception {
 		message = null;
-		message = consumer.receive(timeout);
-		if (message == null) {
-			throw new Exception("No message available");
+		lastReceivedMessage = message;
+		if (consumer != null) {
+			message = consumer.receive(timeout);
+			lastReceivedMessage = message;
+			if (message == null) {
+				throw new Exception("No message available");
+			}
+		}
+		else {
+			throw new Exception("Consumer is not specified.");
 		}
 	}
 	
@@ -432,7 +442,7 @@ public class ProviderSession {
 	 * @throws JMSException
 	 */
 	public void acknowledge() throws JMSException {
-		message.acknowledge();
+		lastReceivedMessage.acknowledge();
 	}
 	
 	public void commit() throws JMSException {
@@ -472,7 +482,7 @@ public class ProviderSession {
 	 * @return message count that was consumed from the queue
 	 * @throws JMSException
 	 */
-	public int clearQueue(String queue) throws JMSException {
+	public int clearQueueOnce(String queue) throws JMSException {
 		int count = 0;
 		Message lastMessage = null;
 		MessageConsumer queueConsumer = session.createConsumer(getQueue(queue));
@@ -510,15 +520,10 @@ public class ProviderSession {
 		do {
 			lastMessage = consumer.receive(DEFAULT_RECEIVE_TIMEOUT);
 			if (lastMessage != null) {
+				lastReceivedMessage = lastMessage;
+			}
+			if (lastMessage != null) {
 				count++;
-				if (session.getTransacted()) {
-					session.commit();
-				}
-				else {
-					if (session.getAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE) {
-						lastMessage.acknowledge();
-					}
-				}
 			}
 		}
 		while (lastMessage != null);

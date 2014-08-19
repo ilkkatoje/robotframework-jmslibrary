@@ -38,20 +38,29 @@ import fi.toje.himmeli.jmslibrary.Options;
  * | ${TEXT}                     Hello world!
  * | 
  * | *** Test Cases ***
- * | Queue Send and Receive TextMessage
+ * | Send And Receive Once TextMessage With Queue
  * |     [Setup]  Clear Queue Once  ${QUEUE}
  * |     Create Text Message  ${TEXT}
  * |     Send To Queue  ${QUEUE}
- * |     Receive Once From Queue  ${QUEUE}  
+ * |     Receive Once From Queue  ${QUEUE}
  * |     ${body}=  Get Text
  * |     Should Be Equal  ${body}  ${TEXT}
  * | 
- * | Topic Send and Receive TextMessage
+ * | Send And Receive BytesMessage With Queue
+ * |     [Setup]  Run Keywords  Init Queue Consumer  ${QUEUE}  AND  Clear
+ * |     Create Bytes Message  ${TEXT}  UTF-8
+ * |     Send To Queue  ${QUEUE}
+ * |     Receive
+ * |     ${body}=  Get Bytes As String  UTF-8
+ * |     Should Be Equal  ${body}  ${TEXT}
+ * |     [Teardown]  Close Consumer
+ * | 
+ * | Send and Receive BytesMessage With Topic
  * |     [Setup]  Init Topic Consumer  ${TOPIC}
- * |     Create Text Message  ${TEXT}
+ * |     Create Bytes Message  ${TEXT}  UTF-8
  * |     Send To Topic  ${TOPIC}
  * |     Receive
- * |     ${body}=  Get Text
+ * |     ${body}=  Get Bytes As String  UTF-8
  * |     Should Be Equal  ${body}  ${TEXT}
  * |     [Teardown]  Close Consumer
  */
@@ -197,6 +206,8 @@ public class JMSLibrary {
 	
 	/**
 	 * Commits all messages in the session.
+	 * 
+	 * Used also with `Clear` when session in CLIENT_ACKNOWLEDGEMENT mode.
 	 */
 	public void commit() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
@@ -212,9 +223,14 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Acknowledges all consumed messages of the session. Used in
-	 * CLIENT_ACKNOWLEDGE mode. Must be used before the consumer of the received
-	 * message is closed or otherwise acknowledgement won't be sent.
+	 * Acknowledges the (last received) message (and all consumed messages of
+	 * the session). Used in CLIENT_ACKNOWLEDGE mode.
+	 * 
+	 * Seems to be that this must be used before the consumer of the received
+	 * message is closed or otherwise acknowledgement won't be sent with
+	 * ActiveMQ.
+	 * 
+	 * Used also with `Clear` when session in CLIENT_ACKNOWLEDGEMENT mode.
 	 */
 	public void acknowledge() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
@@ -541,28 +557,9 @@ public class JMSLibrary {
 	 * - _queue_: name of the queue
 	 */
 	public void initQueueConsumer(String queue) throws JMSException {
-		initQueueConsumer(queue, false);
-	}
-	
-	/**
-	 * (Re)initializes the consumer as queue receiver. Previous consumer is
-	 * closed before. Receive can be called after.
-	 * 
-	 * Arguments:
-	 * - _queue_: name of the queue
-	 * - _clear_: true, clears the destination after initialization.
-	 */
-	public void initQueueConsumer(String queue, boolean clear) throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
 		ps.initializeQueueConsumer(queue);
-		if (clear) {
-			int c = ps.clear();
-			System.out.println("Consumer initialized for " + queue + " and " + c 
-					+ " messages consumed.");
-		}
-		else {
-			System.out.println("Consumer initialized for " + queue + ".");
-		}
+		System.out.println("Consumer initialized for " + queue + ".");
 	}
 	
 	/**
@@ -701,7 +698,7 @@ public class JMSLibrary {
 	 */
 	public int clearQueueOnce(String queue) throws Exception {
 		ProviderSession ps = providerConnection.getProviderSession();
-		int count = ps.clearQueue(queue);
+		int count = ps.clearQueueOnce(queue);
 		System.out.println(count + " messages consumed from " + queue + ".");
 		
 		return count;
@@ -709,8 +706,8 @@ public class JMSLibrary {
 	
 	/**
 	 * Clears the destination of the consumer by reading all
-	 * available messages. Acknowledges or commits depending on the
-	 * session configuration.
+	 * available messages. Does not acknowledge or commit. Cleared messages 
+	 * cannot be accessed anyway.
 	 * 
 	 * `Init Queue Consumer`, `Init Topic Consumer` or `Init Durable Subscriber`
 	 * must have been called before.
