@@ -28,15 +28,11 @@ public class ProviderSession {
 	private Session session;
 	private MessageProducer producer;
 	private MessageConsumer consumer;
-	private HashMap<String, Queue> queues;
-	private HashMap<String, Topic> topics;
 	private Message message;
 	private Message lastReceivedMessage;
 	
 	public ProviderSession(Session session) throws JMSException {
 		this.session = session;
-		queues = new HashMap<String, Queue>();
-		topics = new HashMap<String, Topic>();
 		initProducer();
 	}
 	
@@ -65,8 +61,6 @@ public class ProviderSession {
 		if (message != null) {
 			message = null;
 		}
-		queues.clear();
-		topics.clear();
 	}
 	
 	public void createTextMessage(String text) throws JMSException {
@@ -539,14 +533,7 @@ public class ProviderSession {
 	 * @throws JMSException
 	 */
 	private Queue getQueue(String queue) throws JMSException {
-		Queue q;
-		if (queues.containsKey(queue)) {
-			q = queues.get(queue);
-		}
-		else {
-			q = session.createQueue(queue);
-			queues.put(queue, q);
-		}
+		Queue q = session.createQueue(queue);
 		
 		return q;
 	}
@@ -559,14 +546,7 @@ public class ProviderSession {
 	 * @throws JMSException
 	 */
 	private Topic getTopic(String topic) throws JMSException {
-		Topic t;
-		if (topics.containsKey(topic)) {
-			t = topics.get(topic);
-		}
-		else {
-			t = session.createTopic(topic);
-			topics.put(topic, t);
-		}
+		Topic t  = session.createTopic(topic);
 		
 		return t;
 	}
