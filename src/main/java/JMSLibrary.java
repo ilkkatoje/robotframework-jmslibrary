@@ -7,7 +7,6 @@ import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 import fi.toje.himmeli.jmslibrary.ProviderConnection;
 import fi.toje.himmeli.jmslibrary.ProviderSession;
@@ -26,13 +25,13 @@ import fi.toje.himmeli.jmslibrary.Options;
  * = Example with ActiveMQ =
  * 
  * | *** Settings ***
- * | Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
- * | Suite Setup     Connect And Start
+ * | Library         JMSLibrary
+ * | Suite Setup     Init Provider  ${INITIAL_CONTEXT_FACTORY}  ${JNDI_PROVIDER_URL}  connect=true  start=true
  * | Suite Teardown  Close Connection
  * | 
  * | *** Variables ***
  * | ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
- * | ${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
+ * | ${JNDI_PROVIDER_URL}        tcp://localhost:61616?jms.useAsyncSend=false
  * | ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
  * | ${TOPIC}                    TOPIC.JMSLIBRARY.TEST
  * | ${TEXT}                     Hello world!
@@ -73,33 +72,76 @@ public class JMSLibrary {
 	private ConnectionFactory connectionFactory;
 	private ProviderConnection providerConnection;
 	
-	/**
-	 * Settings for selecting JMS provider. Default JNDI connection factory
-	 * look up string is 'ConnectionFactory'.
-	 * 
-	 * Optional settings:
-	 * - _connection_factory_name_:  lookup name for connection factory
-	 * 
-	 * Examples:
-	 * | Library | JMSLibrary | org.apache.activemq.jndi.ActiveMQInitialContextFactory | tcp://localhost:61616?jms.useAsyncSend=false |
-	 * | Library | JMSLibrary | com.sun.jndi.fscontext.RefFSContextFactory | file:/C:/JNDI-Directory | connection_factory_name=myCF |
-	 */
-	public JMSLibrary(String initialContextFactory, String providerUrl, Map<String, String> settings) throws NamingException {
-		Properties env = new Properties( );
-		env.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
-		env.put(Context.PROVIDER_URL, providerUrl);
-		
-		initialContext = new InitialContext(env);
-		connectionFactory = (ConnectionFactory)initialContext.lookup(getConnectionFactoryLookupName(settings));
+	public JMSLibrary() {
 	}
 	
-	private String getConnectionFactoryLookupName(Map<String, String> settings) {
-		String lookupName = Options.DEFAULT_CONNECTION_FACTORY_LOOKUP_NAME;
-		if (settings.containsKey(Options.SETTINGS_KW_CONNECTION_FACTORY_LOOKUP_NAME)) {
-			lookupName = settings.get(Options.SETTINGS_KW_CONNECTION_FACTORY_LOOKUP_NAME);
-		}
+	/**
+	 * (Re)initializes JMS provider (connection factory). Connection and session
+	 * can be initialized with optional settings, bypassing individual keyword
+	 * usage.
+	 * 
+	 * Optional settings:
+	 * - _connection_factory_name_: lookup name for connection factory. 'ConnectionFactory' is the default value.
+	 * - _connect_: false by default. True connects automatically. Closes previous connection if one existed.
+	 * - _username_:  connection username
+	 * - _password_:  connection password
+	 * - _client_id_: client id.
+	 * - _start_:  false by default. True starts the connection automatically and initializes default session.
+	 * - _transacted_:  false by default.
+	 * - _type_:  session type. AUTO_ACKNOWLEDGE is the default.
+	 * 
+	 * Examples:
+	 * | Init Provider | org.apache.activemq.jndi.ActiveMQInitialContextFactory | tcp://localhost:61616?jms.useAsyncSend=false |
+	 * | Init Provider | com.sun.jndi.fscontext.RefFSContextFactory | file:/C:/JNDI-Directory | connection_factory_name=myCF |  connect=true  |
+	 */
+	public void initProvider(String initialContextFactory, String jndiProviderUrl, Map<String, String> settings) throws Exception {
+		Properties env = new Properties( );
+		env.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
+		env.put(Context.PROVIDER_URL, jndiProviderUrl);
+		initialContext = new InitialContext(env);
 		
-		return lookupName;
+		if (settings != null) {
+			String lookupName = settings.get(Options.SETTINGS_KW_CONNECTION_FACTORY_LOOKUP_NAME);
+			boolean connect = Boolean.parseBoolean(settings.get(Options.SETTINGS_KW_CONNECT));
+			String username = settings.get(Options.SETTINGS_KW_USERNAME);
+			String password = settings.get(Options.SETTINGS_KW_PASSWORD);
+			String clientId = settings.get(Options.SETTINGS_KW_CLIENT_ID);
+			boolean start = Boolean.parseBoolean(settings.get(Options.SETTINGS_KW_START_CONNECTION));
+			boolean transacted = Boolean.parseBoolean(settings.get(Options.SETTINGS_KW_TRANSACTED));
+			String type = settings.get(Options.SETTINGS_KW_TYPE);
+			if (lookupName != null) {
+				connectionFactory = (ConnectionFactory)initialContext.lookup(lookupName);
+			}
+			else {
+				connectionFactory = (ConnectionFactory)initialContext.lookup(Options.DEFAULT_CONNECTION_FACTORY_LOOKUP_NAME);
+			}
+			if (connect) {
+				if (providerConnection != null) {
+					closeConnection();
+				}
+				if (username != null && password != null) {
+					connect(username, password);
+				}
+				else {
+					connect();
+				}
+				if (clientId != null) {
+					setClientId(clientId);
+				}
+				if (start) {
+					if (type != null) {
+						initSession(transacted, type);
+					}
+					else {
+						initSession();
+					}
+					start();
+				}
+			}
+		}
+		else {
+			connectionFactory = (ConnectionFactory)initialContext.lookup(Options.DEFAULT_CONNECTION_FACTORY_LOOKUP_NAME);
+		}
 	}
 	
 	/**

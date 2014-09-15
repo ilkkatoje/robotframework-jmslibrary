@@ -7,6 +7,13 @@ public class Options {
 
 	public static final String DEFAULT_CONNECTION_FACTORY_LOOKUP_NAME = "ConnectionFactory";
 	public static final String SETTINGS_KW_CONNECTION_FACTORY_LOOKUP_NAME = "connection_factory_name";
+	public static final String SETTINGS_KW_CONNECT = "connect";
+	public static final String SETTINGS_KW_CLIENT_ID = "client_id";
+	public static final String SETTINGS_KW_START_CONNECTION = "start";
+	public static final String SETTINGS_KW_TRANSACTED = "transacted";
+	public static final String SETTINGS_KW_TYPE = "type";
+	public static final String SETTINGS_KW_USERNAME = "username";
+	public static final String SETTINGS_KW_PASSWORD = "password";
 	
 	public static final String AUTO_ACKNOWLEDGE = "AUTO_ACKNOWLEDGE";
 	public static final String CLIENT_ACKNOWLEDGE = "CLIENT_ACKNOWLEDGE";

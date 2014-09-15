@@ -1,13 +1,13 @@
 *** Settings ***
 Library         String
-Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}  WITH NAME  jms1
-Library         JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}  WITH NAME  jms2
+Library         JMSLibrary  WITH NAME  jms1
+Library         JMSLibrary  WITH NAME  jms2
 Suite Setup     Initialize Suite
 Suite Teardown  Deinitialize Suite
 
 *** Variables ***
 ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
-${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
+${JNDI_PROVIDER_URL}        tcp://localhost:61616?jms.useAsyncSend=false
 ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
 ${TOPIC}                    TOPIC.JMSLIBRARY.TEST
 
@@ -55,8 +55,8 @@ Clear With Transactions
 
 *** Keywords ***
 Initialize Suite
-    jms1.Connect And Start
-    jms2.Connect And Start
+    jms1.Init Provider  ${INITIAL_CONTEXT_FACTORY}  ${JNDI_PROVIDER_URL}  connect=true  start=true
+    jms2.Init Provider  ${INITIAL_CONTEXT_FACTORY}  ${JNDI_PROVIDER_URL}  connect=true  start=true
 
 Deinitialize Suite
     jms1.Close Connection

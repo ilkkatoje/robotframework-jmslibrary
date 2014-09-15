@@ -1,15 +1,15 @@
 *** Settings ***
 Library			BuiltIn
 Library			OperatingSystem
-Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
-Suite Setup		Connect And Start
+Library			JMSLibrary
+Suite Setup		Init Provider  ${INITIAL_CONTEXT_FACTORY}  ${JNDI_PROVIDER_URL}  connect=true  start=true
 Suite Teardown  Close Connection
 Test Setup      Clear Queue Once  ${QUEUE}
 Test Tear Down  Clear Queue Once  ${QUEUE}
 
 *** Variables ***
 ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
-${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
+${JNDI_PROVIDER_URL}        tcp://localhost:61616?jms.useAsyncSend=false
 ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
 ${FILE1}                    message.xml
 ${FILE2}                    message2.xml

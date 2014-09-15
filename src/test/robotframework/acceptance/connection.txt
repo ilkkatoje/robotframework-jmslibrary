@@ -1,9 +1,10 @@
 *** Settings ***
-Library			JMSLibrary  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
+Library			JMSLibrary
+Suite Setup     Init Provider  ${INITIAL_CONTEXT_FACTORY}  ${JNDI_PROVIDER_URL}
 
 *** Variables ***
 ${INITIAL_CONTEXT_FACTORY}  org.apache.activemq.jndi.ActiveMQInitialContextFactory
-${PROVIDER_URL}             tcp://localhost:61616?jms.useAsyncSend=false
+${JNDI_PROVIDER_URL}        tcp://localhost:61616?jms.useAsyncSend=false
 ${QUEUE}                    QUEUE.JMSLIBRARY.TEST
 ${CLIENT_ID}                jmslibrary
 
