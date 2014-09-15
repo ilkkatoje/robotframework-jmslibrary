@@ -21,8 +21,8 @@ Client Id
     Close Connection
 
 Sequential Connection
-    Connect And Start
-    Run Keyword And Expect Error  *  Connect And Start
+    Connect
+    Run Keyword And Expect Error  *  Connect
     Close Connection
     Connect
     Close Connection

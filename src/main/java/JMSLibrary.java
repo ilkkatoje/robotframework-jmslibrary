@@ -170,26 +170,6 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Connects to provider. Initializes default session and starts the
-	 * connection.
-	 */
-	public void connectAndStart() throws Exception {
-		connect();
-		initSession();
-		start();
-	}
-	
-	/**
-	 * Connects to provider. Initializes default session and starts the
-	 * connection.
-	 */
-	public void connectAndStart(String username, String password) throws Exception {
-		connect(username, password);
-		initSession();
-		start();
-	}
-	
-	/**
 	 * Sets clientId. Must be used right after connect, refer JMS specs.
 	 */
 	public void setClientId(String clientId) throws JMSException {
