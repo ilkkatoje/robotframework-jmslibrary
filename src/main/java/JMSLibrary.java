@@ -394,9 +394,7 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * JMSExpiration of message.
-	 * 
-	 * Returns expiration of message
+	 * Returns JMSExpiration of message.
 	 */
 	public long getJmsExpiration() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
@@ -487,9 +485,7 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * JMSMessageID of the message.
-	 * 
-	 * Returns message id.
+	 * Returns JMSMessageID.
 	 */
 	public String getJmsMessageId() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
