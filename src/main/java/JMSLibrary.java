@@ -111,8 +111,7 @@ public class JMSLibrary {
 			String type = settings.get(Options.SETTINGS_KW_TYPE);
 			if (lookupName != null) {
 				connectionFactory = (ConnectionFactory)initialContext.lookup(lookupName);
-			}
-			else {
+			} else {
 				connectionFactory = (ConnectionFactory)initialContext.lookup(Options.DEFAULT_CONNECTION_FACTORY_LOOKUP_NAME);
 			}
 			if (connect) {
@@ -121,8 +120,7 @@ public class JMSLibrary {
 				}
 				if (username != null && password != null) {
 					connect(username, password);
-				}
-				else {
+				} else {
 					connect();
 				}
 				if (clientId != null) {
@@ -131,15 +129,13 @@ public class JMSLibrary {
 				if (start) {
 					if (type != null) {
 						initSession(transacted, type);
-					}
-					else {
+					} else {
 						initSession();
 					}
 					start();
 				}
 			}
-		}
-		else {
+		} else {
 			connectionFactory = (ConnectionFactory)initialContext.lookup(Options.DEFAULT_CONNECTION_FACTORY_LOOKUP_NAME);
 		}
 	}
@@ -161,8 +157,7 @@ public class JMSLibrary {
 		Connection connection;
 		if (username != null) {
 			connection = connectionFactory.createConnection(username, password);
-		}
-		else {
+		} else {
 			connection = connectionFactory.createConnection();
 		}
 		
@@ -305,6 +300,7 @@ public class JMSLibrary {
 	 */
 	public String getJmsType() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
+		
 		return ps.getType();
 	}
 	
@@ -330,6 +326,7 @@ public class JMSLibrary {
 	 */
 	public String getJmsCorrelationId() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
+		
 		return ps.getJmsCorrelationId();
 	}
 	
@@ -399,6 +396,7 @@ public class JMSLibrary {
 	 */
 	public long getJmsExpiration() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
+		
 		return ps.getJmsExpiration();
 	}
 	

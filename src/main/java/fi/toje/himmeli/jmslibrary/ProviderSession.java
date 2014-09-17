@@ -180,8 +180,7 @@ public class ProviderSession {
 		if (d != null) {
 			if (d instanceof Queue) {
 				ret = ((Queue) d).getQueueName();
-			}
-			else {
+			} else {
 				System.out.println("JMSReplyTo " + d + " is topic! Returns null.");
 			}
 		}
@@ -206,8 +205,7 @@ public class ProviderSession {
 		if (d != null) {
 			if (d instanceof Topic) {
 				ret = ((Topic) d).getTopicName();
-			}
-			else {
+			} else {
 				System.out.println("JMSReplyTo " + d + " is queue! Returns null.");
 			}
 		}
@@ -274,8 +272,7 @@ public class ProviderSession {
 			if (message == null) {
 				throw new Exception("No message available.");
 			}
-		}
-		else {
+		} else {
 			throw new Exception("Consumer is not specified.");
 		}
 	}
@@ -306,8 +303,7 @@ public class ProviderSession {
 		if (message != null) {
 			if (session.getTransacted()) {
 				session.commit();
-			}
-			else {
+			} else {
 				if (session.getAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE) {
 					message.acknowledge();
 				}
@@ -424,8 +420,7 @@ public class ProviderSession {
 			if (message == null) {
 				throw new Exception("No message available");
 			}
-		}
-		else {
+		} else {
 			throw new Exception("Consumer is not specified.");
 		}
 	}
@@ -486,15 +481,13 @@ public class ProviderSession {
 				count++;
 				if (session.getTransacted()) {
 					session.commit();
-				}
-				else {
+				} else {
 					if (session.getAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE) {
 						lastMessage.acknowledge();
 					}
 				}
 			}
-		}
-		while (lastMessage != null);
+		} while (lastMessage != null);
 		
 		queueConsumer.close();
 		
@@ -519,8 +512,7 @@ public class ProviderSession {
 			if (lastMessage != null) {
 				count++;
 			}
-		}
-		while (lastMessage != null);
+		} while (lastMessage != null);
 		
 		return count;
 	}
