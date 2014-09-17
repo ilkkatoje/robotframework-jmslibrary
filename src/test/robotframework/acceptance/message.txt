@@ -25,60 +25,60 @@ Send and Receive TextMessage with Property
     ${received_property}=  Get String Property  own_prop
     Should Be Equal As Strings  ${received_property}  ${value}
 
-JMS Message Id
+Jms Message Id
     Create Text Message  ${TEXT}
-    ${id}=  Get JMS Message Id
+    ${id}=  Get Jms Message Id
     Should Be Equal As Strings  None  ${id}
     Send To Queue  ${QUEUE}
-    ${id}=  Get JMS Message Id
+    ${id}=  Get Jms Message Id
     Should Start With  ${id}  ID:
 
-Set JMS Type
+Set Jms Type
     ${value}=  Generate Random String
     Create Text Message  ${TEXT}
-    Set JMS Type  ${value}  
+    Set Jms Type  ${value}  
     Send To Queue  ${QUEUE}
     Receive Once From Queue  ${QUEUE}
-    ${type}=  Get JMS Type
+    ${type}=  Get Jms Type
     Should Be Equal As Strings  ${type}  ${value}
 
-JMS Correlation Id
+Jms Correlation Id
     ${value}=  Generate Random String
     Create Text Message  ${TEXT}
-    Set JMS Correlation Id  ${value}
+    Set Jms Correlation Id  ${value}
     Send To Queue  ${QUEUE}
     Receive Once From Queue  ${QUEUE}
-    ${cid}=  Get JMS Correlation Id
+    ${cid}=  Get Jms Correlation Id
     Should Be Equal As Strings  ${cid}  ${value}
 
-JMS Reply To Queue with Queue
+Jms Reply To Queue with Queue
     Create Text Message  ${TEXT}
-    Set JMS Reply To Queue  ${REPLY2QUEUE}
+    Set Jms Reply To Queue  ${REPLY2QUEUE}
     Send To Queue  ${QUEUE}
     Receive Once From Queue  ${QUEUE}
-    ${r}=  Get JMS Reply To Queue
+    ${r}=  Get Jms Reply To Queue
     Should Be Equal As Strings  ${r}  ${REPLY2QUEUE}
 
-JMS Reply To Queue with Topic
+Jms Reply To Queue with Topic
     Create Text Message  ${TEXT}
-    Set JMS Reply To Topic  ${TOPIC}
+    Set Jms Reply To Topic  ${TOPIC}
     Send To Queue  ${QUEUE}
     Receive Once From Queue  ${QUEUE}
-    ${q}=  Get JMS Reply To Queue
+    ${q}=  Get Jms Reply To Queue
     Should Be Equal As Strings  ${q}  None
 
-JMS Reply To Topic with Topic
+Jms Reply To Topic with Topic
     Create Text Message  ${TEXT}
-    Set JMS Reply To Topic  ${TOPIC}
+    Set Jms Reply To Topic  ${TOPIC}
     Send To Queue  ${QUEUE}
     Receive Once From Queue  ${QUEUE}
-    ${t}=  Get JMS Reply To Topic
+    ${t}=  Get Jms Reply To Topic
     Should Be Equal As Strings  ${t}  ${TOPIC}
 
-JMS Reply To Topic with Queue
+Jms Reply To Topic with Queue
     Create Text Message  ${TEXT}
-    Set JMS Reply To Queue  ${REPLY2QUEUE}
+    Set Jms Reply To Queue  ${REPLY2QUEUE}
     Send To Queue  ${QUEUE}
     Receive Once From Queue  ${QUEUE}
-    ${t}=  Get JMS Reply To Topic
+    ${t}=  Get Jms Reply To Topic
     Should Be Equal As Strings  ${t}  None

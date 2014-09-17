@@ -12,7 +12,7 @@ ${TOPIC}                    TOPIC.JMSLIBRARY.TEST
 ${TOPIC_D}                  TOPIC.JMSLIBRARY.DURABLE.TEST
 ${CLIENT_ID}                acceptancetest
 ${SUBSCRIPTION_NAME}        acceptance-subscription
-${TEXT}                Hello world!
+${TEXT}                     Hello world!
 
 *** Keywords ***
 Setup

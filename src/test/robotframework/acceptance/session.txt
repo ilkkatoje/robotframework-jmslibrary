@@ -28,7 +28,7 @@ Send Client Acknowledged
     Receive
     Acknowledge
     ${t}=  Get Text
-    ${r}=  Get JMS Redelivered
+    ${r}=  Get Jms Redelivered
     Should Be Equal As Strings  ${t}  ${text1}
     Should Be True  ${r}
     ${qd}=  Queue Depth  ${QUEUE}
@@ -80,18 +80,18 @@ Commit After Closing Consumers
     Should Be Equal As Integers  ${c1}  0
     Should Be Equal As Integers  ${c2}  0
     
-Not JMS Redelivered
+Not Jms Redelivered
     [Setup]  Init Session  false  CLIENT_ACKNOWLEDGE
     Init Queue Consumer  ${QUEUE}
     Create Text Message  ${TEXT}
     Send To Queue  ${QUEUE}
     Receive
-    ${v}=  Get JMS Redelivered
+    ${v}=  Get Jms Redelivered
     Should Not Be True  ${v}
     Acknowledge
     [Teardown]  Close Consumer
 
-JMS Redelivered              
+Jms Redelivered              
     Init Session  false  CLIENT_ACKNOWLEDGE
     Create Text Message  ${TEXT}
     Send To Queue  ${QUEUE}
@@ -101,5 +101,5 @@ JMS Redelivered
     Init Queue Consumer  ${QUEUE}
     Receive
     Acknowledge
-    ${t}=  Get JMS Redelivered
+    ${t}=  Get Jms Redelivered
     Should Be True  ${t}

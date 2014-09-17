@@ -39,9 +39,9 @@ Queue Depth
 Double Send
     Create Text Message  ${TEXT}
     Send To Queue  ${QUEUE}
-    ${v1}=  Get JMS Message Id
+    ${v1}=  Get Jms Message Id
     Send To Queue  ${QUEUE}
-    ${v2}=  Get JMS Message Id
+    ${v2}=  Get Jms Message Id
     Should Not Be Equal  ${v1}  ${v2}
 
 Send and Receive Once TextMessage

@@ -66,7 +66,7 @@ import fi.toje.himmeli.jmslibrary.Options;
 public class JMSLibrary {
 
 	public static final String ROBOT_LIBRARY_SCOPE = "TEST SUITE";
-	public static final String ROBOT_LIBRARY_VERSION = "1.0.0-beta.3";
+	public static final String ROBOT_LIBRARY_VERSION = "1.0.0-beta.4-SNAPSHOT";
 	
 	private InitialContext initialContext;
 	private ConnectionFactory connectionFactory;
@@ -88,7 +88,7 @@ public class JMSLibrary {
 	 * - _client_id_: client id.
 	 * - _start_:  false by default. True starts the connection automatically and initializes default session.
 	 * - _transacted_:  false by default.
-	 * - _type_:  session type. AUTO_ACKNOWLEDGE is the default.
+	 * - _type_:  session type. AUTO_ACKNOWLEDGE by default.
 	 * 
 	 * Examples:
 	 * | Init Provider | org.apache.activemq.jndi.ActiveMQInitialContextFactory | tcp://localhost:61616?jms.useAsyncSend=false |
@@ -294,7 +294,7 @@ public class JMSLibrary {
 	/**
 	 * Sets JMSType of message.
 	 */
-	public void setJMSType(String type) throws JMSException {
+	public void setJmsType(String type) throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
 		ps.setJmsType(type);
 	}
@@ -302,7 +302,7 @@ public class JMSLibrary {
 	/**
 	 * Returns JMSType of message.
 	 */
-	public String getJMSType() throws JMSException {
+	public String getJmsType() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
 		return ps.getType();
 	}
@@ -310,7 +310,7 @@ public class JMSLibrary {
 	/**
 	 * Returns JMSPriority of message.
 	 */
-	public int getJMSPriority() throws JMSException {
+	public int getJmsPriority() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
 		
 		return ps.getJmsPriority();
@@ -319,7 +319,7 @@ public class JMSLibrary {
 	/**
 	 * Sets JMSCorrelationID for message.
 	 */
-	public void setJMSCorrelationId(String correlationId) throws JMSException {
+	public void setJmsCorrelationId(String correlationId) throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
 		ps.setJmsCorrelationId(correlationId);
 	}
@@ -327,7 +327,7 @@ public class JMSLibrary {
 	/**
 	 * Returns JMSCorrelationID of message.
 	 */
-	public String getJMSCorrelationId() throws JMSException {
+	public String getJmsCorrelationId() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
 		return ps.getJmsCorrelationId();
 	}
@@ -335,7 +335,7 @@ public class JMSLibrary {
 	/**
 	 * Sets JMSReplyTo queue for message.
 	 */
-	public void setJMSReplyToQueue(String queue) throws JMSException {
+	public void setJmsReplyToQueue(String queue) throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
 		ps.setJmsReplyToQueue(queue);
 	}
@@ -346,7 +346,7 @@ public class JMSLibrary {
 	 * Returns queue if it was set and was type of queue, otherwise (not set or
 	 * is topic) None.
 	 */
-	public String getJMSReplyToQueue() throws JMSException {
+	public String getJmsReplyToQueue() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
 		
 		return ps.getReplyToQueue();
@@ -355,7 +355,7 @@ public class JMSLibrary {
 	/**
 	 * Sets JMSReplyTo topic for message.
 	 */
-	public void setJMSReplyToTopic(String topic) throws JMSException {
+	public void setJmsReplyToTopic(String topic) throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
 		ps.setJmsReplyToTopic(topic);
 	}
@@ -366,7 +366,7 @@ public class JMSLibrary {
 	 * Returns topic if it was set and was type of topic, otherwise (not set or
 	 * is queue) None.
 	 */
-	public String getJMSReplyToTopic() throws JMSException {
+	public String getJmsReplyToTopic() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
 		
 		return ps.getReplyToTopic();
@@ -398,7 +398,7 @@ public class JMSLibrary {
 	 * 
 	 * Returns expiration of message
 	 */
-	public long getJMSExpiration() throws JMSException {
+	public long getJmsExpiration() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
 		return ps.getJmsExpiration();
 	}
@@ -444,9 +444,9 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Returns delivery mode of message: PERSISTENT or NON_PERSISTENT.
+	 * Returns JMSDeliveryMode of message: PERSISTENT or NON_PERSISTENT.
 	 */
-	public String getJMSDeliveryMode() throws Exception {
+	public String getJmsDeliveryMode() throws Exception {
 		ProviderSession ps = providerConnection.getProviderSession();
 		
 		return Options.convertDeliveryMode(ps.getJmsDeliveryMode());
@@ -457,7 +457,7 @@ public class JMSLibrary {
 	 * 
 	 * Returns true if message was redelivered.
 	 */
-	public boolean getJMSRedelivered() throws JMSException {
+	public boolean getJmsRedelivered() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
 		
 		return ps.getJmsRedelivered();
@@ -491,7 +491,7 @@ public class JMSLibrary {
 	 * 
 	 * Returns message id.
 	 */
-	public String getJMSMessageId() throws JMSException {
+	public String getJmsMessageId() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
 		String id = ps.getJmsMessageId();
 		System.out.println("MessageId=" + id);

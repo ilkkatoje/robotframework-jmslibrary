@@ -20,7 +20,7 @@ Persistent Delivery Mode with Number
 	Create Text Message  ${TEXT}
 	Send To Queue  ${QUEUE}
 	Receive Once From Queue  ${QUEUE}
-	${v}=  Get JMS Delivery Mode
+	${v}=  Get Jms Delivery Mode
     Should Be Equal  PERSISTENT  ${v}
 
 Non-Persistent Delivery Mode with Number
@@ -30,7 +30,7 @@ Non-Persistent Delivery Mode with Number
 	Create Text Message  ${TEXT}
 	Send To Queue  ${QUEUE}
 	Receive Once From Queue  ${QUEUE}
-	${v}=  Get JMS Delivery Mode
+	${v}=  Get Jms Delivery Mode
     Should Be Equal  NON_PERSISTENT  ${v}
 
 Persistent Delivery Mode
@@ -40,7 +40,7 @@ Persistent Delivery Mode
 	Create Text Message  ${TEXT}
 	Send To Queue  ${QUEUE}
 	Receive Once From Queue  ${QUEUE}
-	${v}=  Get JMS Delivery Mode
+	${v}=  Get Jms Delivery Mode
     Should Be Equal  PERSISTENT  ${v}
 
 Non-Persistent Delivery Mode
@@ -50,7 +50,7 @@ Non-Persistent Delivery Mode
 	Create Text Message  ${TEXT}
 	Send To Queue  ${QUEUE}
 	Receive Once From Queue  ${QUEUE}
-	${v}=  Get JMS Delivery Mode
+	${v}=  Get Jms Delivery Mode
     Should Be Equal  NON_PERSISTENT  ${v}
 
 Producer TimeToLive and Message Expiration
@@ -58,7 +58,7 @@ Producer TimeToLive and Message Expiration
     Set Producer Time To Live  20000
     Send To Queue  ${QUEUE}
     Receive Once From Queue  ${QUEUE}
-    ${v}=  Get JMS Expiration
+    ${v}=  Get Jms Expiration
     ${e}=  Evaluate  ${v} > 0
     Should Be True  ${e}
 
@@ -68,7 +68,7 @@ Priority
     Create Text Message  ${TEXT}
     Send To Queue  ${QUEUE}
     Receive Once From Queue  ${QUEUE}
-    ${p}=  Get JMS Priority
+    ${p}=  Get Jms Priority
     Should Be Equal As Strings  ${p}  7
 
 Producer Initialization
