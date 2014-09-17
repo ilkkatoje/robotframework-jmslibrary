@@ -170,7 +170,8 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Sets clientId. Must be used right after connect, refer JMS specs.
+	 * Sets client identifier for connection. Must be used right after connect,
+	 * refer JMS specs.
 	 */
 	public void setClientId(String clientId) throws JMSException {
 		providerConnection.setClientId(clientId);
@@ -178,7 +179,7 @@ public class JMSLibrary {
 	}
 	
 	/**
-	 * Returns clientId.
+	 * Returns client identifier for connection.
 	 */
 	public String getClientId() throws JMSException {
 		return providerConnection.getClientId();
