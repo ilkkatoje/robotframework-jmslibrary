@@ -21,7 +21,7 @@
 			<plugin>
 				<groupId>org.robotframework</groupId>
 				<artifactId>robotframework-maven-plugin</artifactId>
-				<version>1.4.2</version>
+				<version>1.4.4</version>
 				<configuration>
 					<libdoc>
 						<outputFile>robotframework-jmslibrary.html</outputFile>
@@ -39,19 +39,19 @@
 			<plugin>
 				<groupId>org.apache.activemq.tooling</groupId>
 				<artifactId>activemq-maven-plugin</artifactId>
-				<version>5.10.0</version>
-				<configuration>
-					<fork>false</fork>
-				</configuration>
-				<!--executions>
+				<version>5.11.1</version>
+				<executions>
 					<execution>
 						<id>start-activemq</id>
 						<phase>pre-integration-test</phase>
+						<configuration>
+							<fork>true</fork>
+						</configuration>
 						<goals>
 							<goal>run</goal>
 						</goals>
 					</execution>
-				</executions-->
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -65,7 +65,7 @@
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-all</artifactId>
-			<version>5.10.0</version>
+			<version>5.11.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
