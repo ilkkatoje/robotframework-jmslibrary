@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
-import java.util.HashMap;
 
 import javax.jms.BytesMessage;
 import javax.jms.Destination;
