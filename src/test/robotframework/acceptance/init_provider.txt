@@ -10,3 +10,9 @@ Initialization With Client Id
     Init Provider  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}  connect=true  client_id=moi
     ${id}=  Get Client Id
     Should Be Equal As Strings  ${id}  moi
+    Close Connection
+
+Initialization
+    Init Provider  ${INITIAL_CONTEXT_FACTORY}  ${PROVIDER_URL}
+    Connect
+    Close Connection
