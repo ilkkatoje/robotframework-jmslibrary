@@ -55,7 +55,7 @@ Transaction With Two Receives
     Receive
     Receive
     Rollback
-    Receive  1000
+    Receive  2000
     Receive
     Run Keyword And Expect Error  *  Receive
     Commit
