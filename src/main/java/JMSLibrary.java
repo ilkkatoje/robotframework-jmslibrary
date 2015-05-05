@@ -225,7 +225,7 @@ public class JMSLibrary {
 	/**
 	 * Commits all messages in the session.
 	 * 
-	 * Used also with `Clear` when session in CLIENT_ACKNOWLEDGEMENT mode.
+	 * Used also with `Clear` when session in SESSION_TRANSACTED mode.
 	 */
 	public void commit() throws JMSException {
 		ProviderSession ps = providerConnection.getProviderSession();
@@ -242,11 +242,7 @@ public class JMSLibrary {
 	
 	/**
 	 * Acknowledges the (last received) message (and all consumed messages of
-	 * the session). Used in CLIENT_ACKNOWLEDGE mode.
-	 * 
-	 * Seems to be that this must be used before the consumer of the received
-	 * message is closed or otherwise acknowledgement won't be sent with
-	 * ActiveMQ.
+	 * the session) when CLIENT_ACKNOWLEDGE mode is used.
 	 * 
 	 * Used also with `Clear` when session in CLIENT_ACKNOWLEDGEMENT mode.
 	 */
